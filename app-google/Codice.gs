@@ -181,6 +181,16 @@ function aggiungiParrocchie(){
   return "parrocchie aggiunte";
 }
 
+// Aggiunge i due contatori gas di San Domenico (1883/1884) se mancanti.
+function aggiungiContatoriMancanti(){
+  var st=_statoCorrente(); st.utenze=st.utenze||[];
+  function addU(o){ if(!st.utenze.some(function(x){return x.id===o.id;})) st.utenze.push(o); }
+  addU({id:"u-1883",intestatario:"int-annunziata",tipo:"gas",luogo:"Via Largo San Domenico 2 (gas 1883)",indirizzo:"Via Largo San Domenico 2",codice:"15104203604752",pde:"1883",potenza:null,note:""});
+  addU({id:"u-1884",intestatario:"int-annunziata",tipo:"gas",luogo:"Via Largo San Domenico 2 (gas 1884)",indirizzo:"Via Largo San Domenico 2",codice:"15104203604750",pde:"1884",potenza:null,note:""});
+  apiSalva(JSON.stringify(st));
+  return "contatori 1883/1884 aggiunti";
+}
+
 // Svuota TUTTE le bollette (per ricaricare i PDF puliti col parser aggiornato). Le utenze restano.
 function svuotaBollette(){
   var st = _statoCorrente();
