@@ -278,6 +278,16 @@ function svuotaBollette(){
   return "bollette svuotate";
 }
 
+// Rimuove le parrocchie "fantasma" (senza utenze collegate e senza codice cliente).
+function pulisciAnagrafica(){
+  var st=_statoCorrente(); st.intestatari=st.intestatari||[]; st.utenze=st.utenze||[];
+  var usati={}; st.utenze.forEach(function(u){usati[u.intestatario]=true;});
+  var prima=st.intestatari.length;
+  st.intestatari=st.intestatari.filter(function(x){ return usati[x.id] || (x.codiceCliente && x.codiceCliente!==""); });
+  apiSalva(JSON.stringify(st));
+  return "rimossi "+(prima-st.intestatari.length)+" intestatari fantasma";
+}
+
 // ---- IMPORT IN BLOCCO da una cartella Drive (stessa logica incrementale del caricamento UI) ----
 function _recDaParse(c, url, nome){
   return { id:"", utenza:"", numero:c.numero||"", fornitore:c.fornitore||"",
@@ -296,13 +306,16 @@ function _trovaOCreaIntStato(c, st, cr){
   st.intestatari.push({id:id,nome:c.intestatario||("Cliente "+cod),cf:c.cf||"",codiceCliente:cod,fornitore:"Energentium"});
   cr.intestatari++; return id;
 }
-function _trovaOCreaUtStato(c, intId, st, cr){
+// Aggancia la bolletta a un'utenza: se il POD/PDR esiste, la riusa col suo
+// intestatario; SOLO se l'utenza è nuova crea (o ritrova) la parrocchia.
+function _agganciaUtenza(c, st, cr){
   if(!c.codice) return "";
   var n=normEnergia(c.codice);
   for(var i=0;i<st.utenze.length;i++){ var u=st.utenze[i]; if(normEnergia(u.codice)===n){
     if((u.potenza==null||u.potenza==="")&&c.potenza!=null) u.potenza=c.potenza;
     if(!u.indirizzo&&c.indirizzoFornitura) u.indirizzo=c.indirizzoFornitura;
     if(!u.pde&&c.pde) u.pde=c.pde; return u.id; } }
+  var intId=_trovaOCreaIntStato(c, st, cr);
   var id="u-"+(c.pde||("x"+st.utenze.length));
   for(var k=0;k<st.utenze.length;k++) if(st.utenze[k].id===id){ id="u-x"+st.utenze.length; break; }
   var luogo=c.indirizzoFornitura?(c.indirizzoFornitura+(c.pde?" (PDE "+c.pde+")":"")):("PDE "+(c.pde||"?"));
@@ -323,7 +336,7 @@ function _importaFile(file, st, cr){
     var c=parseBolletta(blocchi[i]);
     var rec=_recDaParse(c, url, file.getName());
     if(c.fornitore!=="energentium"){ rec.utenza=""; rec.note="fornitore non riconosciuto — compila a mano"; rec.id="b-"+new Date().getTime()+"-"+Math.floor(Math.random()*1e6); st.bollette.push(rec); cr.nonric++; continue; }
-    if(c.codice){ var intId=_trovaOCreaIntStato(c, st, cr); rec.utenza=_trovaOCreaUtStato(c, intId, st, cr); }
+    rec.utenza=_agganciaUtenza(c, st, cr);
     if(_esisteBollettaStato(rec, st)){ cr.dup++; continue; }
     rec.id="b-"+new Date().getTime()+"-"+Math.floor(Math.random()*1e6);
     st.bollette.push(rec); cr.bollette++;
@@ -349,7 +362,8 @@ function reimportaArchivio(){
   svuotaBollette();
   var giugno = importaCartella("111rRESpsxfALneO7bvQ6I0CMzy1LmmBW"); // giugno 2026 bollete
   var storico = importaCartella("1Hgs3jFSdv1VQE5UBuZKWP5mBaLnLbNSi"); // BOLLETTE (GAS+LUCE)
-  var esito = { giugno: giugno, storico: storico };
+  var pulizia = pulisciAnagrafica();
+  var esito = { giugno: giugno, storico: storico, pulizia: pulizia };
   Logger.log(JSON.stringify(esito));
   return esito;
 }

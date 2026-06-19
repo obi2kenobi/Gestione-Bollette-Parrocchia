@@ -268,7 +268,7 @@
     STATO.intestatari.push({id:id,nome:c.intestatario||("Cliente "+cod),cf:c.cf||"",codiceCliente:cod,fornitore:"Energentium"});
     CREATI.intestatari++; return id;
   }
-  function trovaOCreaUtenza(c,intId){
+  function agganciaUtenza(c){
     if(!c.codice) return ""; // senza POD/PDR non creo (resta "da abbinare")
     var n=normEnergia(c.codice);
     var ex=STATO.utenze.filter(function(x){return normEnergia(x.codice)===n;})[0];
@@ -276,8 +276,9 @@
       if((ex.potenza==null||ex.potenza==="")&&c.potenza!=null) ex.potenza=c.potenza;
       if(!ex.indirizzo&&c.indirizzoFornitura) ex.indirizzo=c.indirizzoFornitura;
       if(!ex.pde&&c.pde) ex.pde=c.pde;
-      return ex.id;
+      return ex.id; // utenza già nota: uso la sua parrocchia, non ne creo
     }
+    var intId=trovaOCreaIntestatario(c); // parrocchia solo per utenza nuova
     var id="u-"+(c.pde||uid());
     if(STATO.utenze.some(function(x){return x.id===id;})) id="u-"+uid();
     var luogo=c.indirizzoFornitura?(c.indirizzoFornitura+(c.pde?" (PDE "+c.pde+")":"")):("PDE "+(c.pde||"?"));
@@ -300,7 +301,7 @@
       if(c.fornitore!=="energentium"){
         rec.id=uid(); rec.utenza=""; rec.note="fornitore non riconosciuto — compila a mano"; STATO.bollette.push(rec); nonric++; return;
       }
-      if(c.codice){ var intId=trovaOCreaIntestatario(c); rec.utenza=trovaOCreaUtenza(c,intId); }
+      if(c.codice){ rec.utenza=agganciaUtenza(c); }
       if(esisteBolletta(rec)){ dup++; return; }
       if(rec.importo===""){ rec.note="dati incompleti — verifica"; incompleta++; }
       rec.id=uid(); STATO.bollette.push(rec); add++;
