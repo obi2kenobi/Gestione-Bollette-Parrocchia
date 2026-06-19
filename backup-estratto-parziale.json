@@ -1,0 +1,456 @@
+{
+  "app": "gestione-utenze",
+  "versione": 1,
+  "data": "2026-06-19T12:00:00.000Z",
+  "intestatari": [
+    {
+      "id": "int-annunziata",
+      "nome": "Parrocchia Ss. Annunziata e S. Domenico",
+      "cf": "91001740504",
+      "fornitore": "Energentium",
+      "codiceCliente": "526436",
+      "stato": "In corso (Verifiche attive)"
+    },
+    {
+      "id": "int-caterina",
+      "nome": "Santa Caterina",
+      "cf": "91001770501",
+      "fornitore": "Energentium",
+      "codiceCliente": "526437",
+      "stato": "In corso (Verifiche attive)"
+    },
+    {
+      "id": "int-stefano",
+      "nome": "Parrocchia SS Stefano e Michele",
+      "cf": "91001780500",
+      "fornitore": "Energentium",
+      "codiceCliente": "526640",
+      "stato": "Da verificare (non nel registro originale)"
+    },
+    {
+      "id": "int-michele",
+      "nome": "Parrocchia San Michele Arcangelo",
+      "cf": "91000640507",
+      "fornitore": "Energentium",
+      "codiceCliente": "526418",
+      "stato": "Da verificare (non nel registro originale)"
+    },
+    {
+      "id": "int-lucia",
+      "nome": "Parrocchia S. Lucia Vergine e Martire",
+      "cf": "91001760502",
+      "fornitore": "Energentium",
+      "codiceCliente": "559447",
+      "stato": "Da verificare (non nel registro originale)"
+    },
+    {
+      "id": "int-lorenzo",
+      "nome": "Parrocchia San Lorenzo",
+      "cf": "91002880507",
+      "fornitore": "Energentium",
+      "codiceCliente": "526446",
+      "stato": "Da inserire (non nel registro originale)"
+    }
+  ],
+  "utenze": [
+    {
+      "id": "u-1876",
+      "intestatario": "int-annunziata",
+      "tipo": "elettrico",
+      "luogo": "Via Carducci 44 (Annunziatina)",
+      "indirizzo": "Via Largo San Domenico 2",
+      "codice": "IT001E45094321",
+      "pde": "1876",
+      "potenza": 10,
+      "note": ""
+    },
+    {
+      "id": "u-1872",
+      "intestatario": "int-annunziata",
+      "tipo": "elettrico",
+      "luogo": "Via Carducci 44 (Annunziatina)",
+      "indirizzo": "Via Giosuè Carducci 44",
+      "codice": "IT001E45094319",
+      "pde": "1872",
+      "potenza": 3,
+      "note": "Utenza minore"
+    },
+    {
+      "id": "u-1877",
+      "intestatario": "int-annunziata",
+      "tipo": "elettrico",
+      "luogo": "San Domenico ex Volpi",
+      "indirizzo": "Via Largo San Domenico 2",
+      "codice": "IT001E45092997",
+      "pde": "1877",
+      "potenza": 6,
+      "note": ""
+    },
+    {
+      "id": "u-1875",
+      "intestatario": "int-annunziata",
+      "tipo": "elettrico",
+      "luogo": "San Domenico ex Bandini",
+      "indirizzo": "Via Largo San Domenico 2",
+      "codice": "IT001E45092995",
+      "pde": "1875",
+      "potenza": 3,
+      "note": ""
+    },
+    {
+      "id": "u-1874",
+      "intestatario": "int-annunziata",
+      "tipo": "elettrico",
+      "luogo": "San Domenico canonica",
+      "indirizzo": "Via Largo San Domenico 2",
+      "codice": "IT001E45092996",
+      "pde": "1874",
+      "potenza": 3,
+      "note": ""
+    },
+    {
+      "id": "u-1873",
+      "intestatario": "int-annunziata",
+      "tipo": "elettrico",
+      "luogo": "Crocetta",
+      "indirizzo": "Via Giosuè Carducci 21",
+      "codice": "IT001E45094306",
+      "pde": "1873",
+      "potenza": 3,
+      "note": ""
+    },
+    {
+      "id": "u-1871",
+      "intestatario": "int-annunziata",
+      "tipo": "elettrico",
+      "luogo": "Garage Chimenti",
+      "indirizzo": "Via Giosuè Carducci 36",
+      "codice": "IT001E45094324",
+      "pde": "1871",
+      "potenza": 1,
+      "note": "Bassa potenza"
+    },
+    {
+      "id": "u-1870",
+      "intestatario": "int-annunziata",
+      "tipo": "elettrico",
+      "luogo": "Chiesa",
+      "indirizzo": "Via Largo San Domenico 2",
+      "codice": "IT001E44979941",
+      "pde": "1870",
+      "potenza": 10,
+      "note": "Potenza ridotta a 10 kW (bolletta mar 2026, con addebito variazione 23 €). Il registro indicava 25 kW."
+    },
+    {
+      "id": "u-1885",
+      "intestatario": "int-annunziata",
+      "tipo": "gas",
+      "luogo": "Chiesa",
+      "codice": "15104203604751",
+      "pde": "1885",
+      "potenza": null,
+      "note": "DA CHIUDERE?"
+    },
+    {
+      "id": "u-1886",
+      "intestatario": "int-annunziata",
+      "tipo": "gas",
+      "luogo": "Via Carducci 44",
+      "indirizzo": "Via Giosuè Carducci 44",
+      "codice": "15104203603187",
+      "pde": "1886",
+      "potenza": null,
+      "note": "CHIESA O SALA?"
+    },
+    {
+      "id": "u-1887",
+      "intestatario": "int-annunziata",
+      "tipo": "gas",
+      "luogo": "Sacrestia San Domenico",
+      "indirizzo": "Via San Domenico 1",
+      "codice": "15104203604748",
+      "pde": "1887",
+      "potenza": null,
+      "note": ""
+    },
+    {
+      "id": "u-acqua-c19",
+      "intestatario": "int-annunziata",
+      "tipo": "acqua",
+      "luogo": "Via Carducci 19 (acqua)",
+      "indirizzo": "Via Giosuè Carducci 19",
+      "codice": "200005047891",
+      "pde": "—",
+      "potenza": null,
+      "note": "Acque SpA · cod. cliente 1001033069 · contratto 3600811223 · contatore 2025303036. Deposito cauzionale 27,33 € (restituito attivando la domiciliazione)."
+    },
+    {
+      "id": "u-1882",
+      "intestatario": "int-caterina",
+      "tipo": "elettrico",
+      "luogo": "Appartamento Resmi",
+      "codice": "IT001E40632896",
+      "pde": "1882",
+      "potenza": 3,
+      "note": ""
+    },
+    {
+      "id": "u-1881",
+      "intestatario": "int-caterina",
+      "tipo": "elettrico",
+      "luogo": "Ubicazione da definire",
+      "codice": "IT001E45092448",
+      "pde": "1881",
+      "potenza": 3,
+      "note": "DA CHIARIRE"
+    },
+    {
+      "id": "u-1880",
+      "intestatario": "int-caterina",
+      "tipo": "elettrico",
+      "luogo": "Via Calenzano 22",
+      "codice": "IT001E45094368",
+      "pde": "1880",
+      "potenza": 1.5,
+      "note": "DA CHIARIRE SCOPO"
+    },
+    {
+      "id": "u-1879",
+      "intestatario": "int-caterina",
+      "tipo": "elettrico",
+      "luogo": "Campane",
+      "codice": "IT001E45092449",
+      "pde": "1879",
+      "potenza": 10,
+      "note": "Potenza elevata"
+    },
+    {
+      "id": "u-1878",
+      "intestatario": "int-caterina",
+      "tipo": "elettrico",
+      "luogo": "Sala",
+      "codice": "IT001E40632895",
+      "pde": "1878",
+      "potenza": 0.73,
+      "note": "Potenza minima"
+    },
+    {
+      "id": "u-enel-cat",
+      "intestatario": "int-caterina",
+      "tipo": "gas",
+      "luogo": "Piazza XX Settembre 8A",
+      "indirizzo": "Piazza XX Settembre 8A",
+      "codice": "15104203823013",
+      "pde": "—",
+      "potenza": null,
+      "note": "Fornitore Enel, n. cliente 106440451"
+    },
+    {
+      "id": "u-enel-107",
+      "intestatario": "int-caterina",
+      "tipo": "gas",
+      "luogo": "Piazza XX Settembre 8C (PDR …0107)",
+      "indirizzo": "Piazza XX Settembre 8C",
+      "codice": "15104204100107",
+      "pde": "—",
+      "potenza": null,
+      "note": "Fornitore Enel, n. cliente 106440475. Emersa dal sollecito del 12/06/2026."
+    },
+    {
+      "id": "u-enel-108",
+      "intestatario": "int-caterina",
+      "tipo": "gas",
+      "luogo": "Piazza XX Settembre 8C (PDR …0108)",
+      "indirizzo": "Piazza XX Settembre 8C",
+      "codice": "15104204100108",
+      "pde": "—",
+      "potenza": null,
+      "note": "Fornitore Enel, n. cliente 106440489. Emersa dal sollecito del 12/06/2026."
+    },
+    {
+      "id": "u-1919",
+      "intestatario": "int-stefano",
+      "tipo": "elettrico",
+      "luogo": "Piazzetta Santo Stefano 1",
+      "indirizzo": "Piazzetta Santo Stefano 1",
+      "codice": "IT001E45092716",
+      "pde": "1919",
+      "potenza": 30,
+      "note": "Alta potenza (30 kW) ma consumo quasi nullo"
+    },
+    {
+      "id": "u-1898",
+      "intestatario": "int-michele",
+      "tipo": "elettrico",
+      "luogo": "Chiesa parrocchiale San Michele (Via Landeschi 3)",
+      "indirizzo": "Via G.B. Landeschi 3",
+      "codice": "IT001E45091863",
+      "pde": "1898",
+      "potenza": 3,
+      "note": ""
+    },
+    {
+      "id": "u-1868",
+      "intestatario": "int-michele",
+      "tipo": "elettrico",
+      "luogo": "Via Capocavallo snc",
+      "indirizzo": "Via Capocavallo snc",
+      "codice": "IT001E43425085",
+      "pde": "1868",
+      "potenza": 3,
+      "note": ""
+    },
+    {
+      "id": "u-3425",
+      "intestatario": "int-lucia",
+      "tipo": "elettrico",
+      "luogo": "Via Montegrappa 1",
+      "indirizzo": "Via Montegrappa 1",
+      "codice": "IT001E45093365",
+      "pde": "3425",
+      "potenza": 1.5,
+      "note": "Fornitura recente (dal 10/07/2025), consumo quasi nullo"
+    },
+    {
+      "id": "u-1888",
+      "intestatario": "int-lorenzo",
+      "tipo": "elettrico",
+      "luogo": "Via Sanminiatese 92 (piano)",
+      "indirizzo": "Via Sanminiatese 92",
+      "codice": "IT001E45092896",
+      "pde": "1888",
+      "potenza": 3,
+      "note": "Emersa dalle bollette"
+    },
+    {
+      "id": "u-1889",
+      "intestatario": "int-lorenzo",
+      "tipo": "elettrico",
+      "luogo": "Via Sanminiatese 92",
+      "indirizzo": "Via Sanminiatese 92",
+      "codice": "IT001E45092897",
+      "pde": "1889",
+      "potenza": 6,
+      "note": "Emersa dalle bollette"
+    }
+  ],
+  "bollette": [
+    {
+      "id": "imp-1",
+      "utenza": "u-1919",
+      "numero": "2026-30014753",
+      "dataInizio": "2026-05-01",
+      "dataFine": "2026-05-31",
+      "consumo": "2",
+      "importo": "85.75",
+      "quotaFissa": "78.52",
+      "scadenza": "2026-07-08",
+      "pagata": false,
+      "linkDrive": "https://drive.google.com/file/d/1GwNDwaXMBOM53ccg_MhJwDQ5g5gwV_ea/view",
+      "fileNome": "BOLLETTA EE 526640.pdf"
+    },
+    {
+      "id": "imp-2",
+      "utenza": "u-1886",
+      "numero": "2026-5173",
+      "dataInizio": "2026-04-01",
+      "dataFine": "2026-04-30",
+      "consumo": "30",
+      "importo": "58.80",
+      "quotaFissa": "14.23",
+      "scadenza": "2026-06-09",
+      "pagata": false,
+      "linkDrive": "https://drive.google.com/file/d/1IyrGLRMYIiEwCB4HPV3DeLRTx3smgE6P/view",
+      "fileNome": "BOLLETTA GA 526436.pdf"
+    },
+    {
+      "id": "imp-3",
+      "utenza": "u-1887",
+      "numero": "2026-5174",
+      "dataInizio": "2026-04-01",
+      "dataFine": "2026-04-30",
+      "consumo": "0",
+      "importo": "16.14",
+      "quotaFissa": "14.23",
+      "scadenza": "2026-06-09",
+      "pagata": false,
+      "linkDrive": "https://drive.google.com/file/d/1IyrGLRMYIiEwCB4HPV3DeLRTx3smgE6P/view",
+      "fileNome": "BOLLETTA GA 526436.pdf"
+    },
+    {
+      "id": "imp-4",
+      "utenza": "u-3425",
+      "numero": "2026-30015490",
+      "dataInizio": "2026-05-01",
+      "dataFine": "2026-05-31",
+      "consumo": "3",
+      "importo": "23.56",
+      "quotaFissa": "19.80",
+      "scadenza": "2026-07-08",
+      "pagata": false,
+      "linkDrive": "https://drive.google.com/file/d/1IBlR1ywUUhArDY16f8j4x4JIC6TXcb6D/view",
+      "fileNome": "BOLLETTA EE 559447.pdf"
+    },
+    {
+      "id": "imp-5",
+      "utenza": "u-1898",
+      "numero": "2026-30012483",
+      "dataInizio": "2026-04-01",
+      "dataFine": "2026-04-30",
+      "consumo": "28",
+      "importo": "39.39",
+      "quotaFissa": "27.21",
+      "scadenza": "2026-06-08",
+      "pagata": false,
+      "linkDrive": "https://drive.google.com/file/d/1yibIIwRE7wDGRT0ruwoQc856vSmDRtT0/view",
+      "fileNome": "BOLLETTA EE 526418.pdf"
+    },
+    {
+      "id": "imp-6",
+      "utenza": "u-1868",
+      "numero": "2026-30013710",
+      "dataInizio": "2026-04-01",
+      "dataFine": "2026-04-30",
+      "consumo": "27",
+      "importo": "40.00",
+      "quotaFissa": "27.21",
+      "scadenza": "2026-06-08",
+      "pagata": false,
+      "linkDrive": "https://drive.google.com/file/d/1yibIIwRE7wDGRT0ruwoQc856vSmDRtT0/view",
+      "fileNome": "BOLLETTA EE 526418.pdf"
+    },
+    {
+      "id": "imp-7",
+      "utenza": "u-1888",
+      "numero": "2026-30014726",
+      "dataInizio": "2026-05-01",
+      "dataFine": "2026-05-31",
+      "consumo": "39",
+      "importo": "36.59",
+      "quotaFissa": "25.15",
+      "scadenza": "2026-07-08",
+      "pagata": false,
+      "linkDrive": "https://drive.google.com/file/d/1p5LttL1pjdo1clq_1pl5ncpwool39sv2/view",
+      "fileNome": "BOLLETTA EE 526446.pdf"
+    },
+    {
+      "id": "imp-8",
+      "utenza": "u-1889",
+      "numero": "2026-30014727",
+      "dataInizio": "2026-05-01",
+      "dataFine": "2026-05-31",
+      "consumo": "27",
+      "importo": "54.70",
+      "quotaFissa": "39.88",
+      "scadenza": "2026-07-08",
+      "pagata": false,
+      "linkDrive": "https://drive.google.com/file/d/1p5LttL1pjdo1clq_1pl5ncpwool39sv2/view",
+      "fileNome": "BOLLETTA EE 526446.pdf"
+    }
+  ],
+  "azioni": [],
+  "impostazioni": {
+    "driveFolder": "",
+    "ultimoBackup": null
+  }
+}

@@ -1,0 +1,4737 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gestione Utenze — Bollette Parrocchie</title>
+  <style>
+    html, body { margin:0; padding:0; background:#f4f6f8; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+    #root { min-height:100vh; }
+    #avvio { max-width:640px; margin:60px auto; padding:24px 28px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; color:#334155; line-height:1.5; }
+    #avvio h1 { font-size:18px; margin:0 0 8px; }
+    .err { color:#b91c1c; }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <div id="avvio">
+      <h1>Avvio in corso…</h1>
+      <p>Se questo messaggio resta visibile per più di qualche secondo, controlla la connessione a Internet:
+      al primo avvio vengono scaricate le librerie necessarie. Poi ricarica la pagina (F5).</p>
+    </div>
+  </div>
+
+  <!-- Librerie da CDN: servono solo al primo avvio, poi restano nella cache del browser. -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/lucide-react@0.383.0/dist/umd/lucide-react.min.js"></script>
+
+  <!-- Applicazione: JSX già tradotto in JavaScript (nessuna compilazione nel browser). -->
+  <script>
+  (function () {
+    function avvia() {
+      if (!window.React || !window.ReactDOM || !window.LucideReact) {
+        document.getElementById("root").innerHTML =
+          '<div id="avvio"><h1 class="err">Librerie non caricate</h1><p>Non è stato possibile scaricare React/icone. Verifica la connessione a Internet e ricarica la pagina.</p></div>';
+        return;
+      }
+      try {
+const {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  useRef,
+  Fragment
+} = React;
+const _LR = window.LucideReact || window.lucideReact || {};
+const Zap = _LR.Zap || (() => null),
+  Flame = _LR.Flame || (() => null),
+  FileText = _LR.FileText || (() => null),
+  ClipboardList = _LR.ClipboardList || (() => null),
+  BarChart3 = _LR.BarChart3 || (() => null),
+  Building2 = _LR.Building2 || (() => null),
+  Plus = _LR.Plus || (() => null),
+  Download = _LR.Download || (() => null),
+  AlertTriangle = _LR.AlertTriangle || (() => null),
+  CheckCircle2 = _LR.CheckCircle2 || (() => null),
+  Circle = _LR.Circle || (() => null),
+  Trash2 = _LR.Trash2 || (() => null),
+  X = _LR.X || (() => null),
+  Search = _LR.Search || (() => null),
+  TrendingUp = _LR.TrendingUp || (() => null),
+  TrendingDown = _LR.TrendingDown || (() => null),
+  Minus = _LR.Minus || (() => null),
+  Pencil = _LR.Pencil || (() => null),
+  Euro = _LR.Euro || (() => null),
+  Calendar = _LR.Calendar || (() => null),
+  ChevronDown = _LR.ChevronDown || (() => null),
+  Upload = _LR.Upload || (() => null),
+  Sparkles = _LR.Sparkles || (() => null),
+  Link2 = _LR.Link2 || (() => null),
+  FileCheck = _LR.FileCheck || (() => null),
+  Loader2 = _LR.Loader2 || (() => null),
+  HelpCircle = _LR.HelpCircle || (() => null),
+  Droplets = _LR.Droplets || (() => null);
+
+/* ============================================================
+   PALETTE & TOKENS
+   Soggetto: registro utenze energetiche di enti ecclesiastici.
+   Verderame (coperture in rame ossidato), ardesia, ambra-energia.
+============================================================ */
+const C = {
+  bg: "#F3F1EC",
+  // carta avorio
+  panel: "#FBFAF6",
+  // pannello chiaro
+  ink: "#23302E",
+  // ardesia profonda (testo)
+  inkSoft: "#5C6B68",
+  // testo secondario
+  line: "#DAD6CB",
+  // linee registro
+  verde: "#3E6B5E",
+  // verderame
+  verdeDk: "#2C4F45",
+  ambra: "#C8841E",
+  // energia elettrica
+  ambraSoft: "#F4E3C4",
+  gasBlue: "#3D6A8C",
+  // gas
+  gasSoft: "#D9E6EE",
+  rosso: "#B0492F",
+  // alert / da chiudere
+  rossoSoft: "#F2DCD4",
+  ok: "#3E6B5E"
+};
+const fontDisplay = '"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif';
+const fontBody = '"Inter","Segoe UI",system-ui,sans-serif';
+const fontMono = '"SFMono-Regular",Consolas,"Liberation Mono",monospace';
+
+/* ============================================================
+   DATI INIZIALI — precaricati dal PDF Registro Centralizzato
+============================================================ */
+const SEED_INTESTATARI = [{
+  id: "int-annunziata",
+  nome: "Parrocchia Ss. Annunziata e S. Domenico",
+  cf: "91001740504",
+  fornitore: "Energentium",
+  codiceCliente: "526436",
+  stato: "In corso (Verifiche attive)"
+}, {
+  id: "int-caterina",
+  nome: "Santa Caterina",
+  cf: "91001770501",
+  fornitore: "Energentium",
+  codiceCliente: "526437",
+  stato: "In corso (Verifiche attive)"
+}, {
+  id: "int-stefano",
+  nome: "Parrocchia SS Stefano e Michele",
+  cf: "91001780500",
+  fornitore: "Energentium",
+  codiceCliente: "526640",
+  stato: "Da verificare (non nel registro originale)"
+}, {
+  id: "int-michele",
+  nome: "Parrocchia San Michele Arcangelo",
+  cf: "91000640507",
+  fornitore: "Energentium",
+  codiceCliente: "526418",
+  stato: "Da verificare (non nel registro originale)"
+}, {
+  id: "int-lucia",
+  nome: "Parrocchia S. Lucia Vergine e Martire",
+  cf: "91001760502",
+  fornitore: "Energentium",
+  codiceCliente: "559447",
+  stato: "Da verificare (non nel registro originale)"
+}];
+const SEED_UTENZE = [
+// --- Annunziata: elettrico
+{
+  id: "u-1876",
+  intestatario: "int-annunziata",
+  tipo: "elettrico",
+  luogo: "Via Carducci 44 (Annunziatina)",
+  indirizzo: "Via Largo San Domenico 2",
+  codice: "IT001E45094321",
+  pde: "1876",
+  potenza: 10,
+  note: ""
+}, {
+  id: "u-1872",
+  intestatario: "int-annunziata",
+  tipo: "elettrico",
+  luogo: "Via Carducci 44 (Annunziatina)",
+  indirizzo: "Via Giosuè Carducci 44",
+  codice: "IT001E45094319",
+  pde: "1872",
+  potenza: 3,
+  note: "Utenza minore"
+}, {
+  id: "u-1877",
+  intestatario: "int-annunziata",
+  tipo: "elettrico",
+  luogo: "San Domenico ex Volpi",
+  indirizzo: "Via Largo San Domenico 2",
+  codice: "IT001E45092997",
+  pde: "1877",
+  potenza: 6,
+  note: ""
+}, {
+  id: "u-1875",
+  intestatario: "int-annunziata",
+  tipo: "elettrico",
+  luogo: "San Domenico ex Bandini",
+  indirizzo: "Via Largo San Domenico 2",
+  codice: "IT001E45092995",
+  pde: "1875",
+  potenza: 3,
+  note: ""
+}, {
+  id: "u-1874",
+  intestatario: "int-annunziata",
+  tipo: "elettrico",
+  luogo: "San Domenico canonica",
+  indirizzo: "Via Largo San Domenico 2",
+  codice: "IT001E45092996",
+  pde: "1874",
+  potenza: 3,
+  note: ""
+}, {
+  id: "u-1873",
+  intestatario: "int-annunziata",
+  tipo: "elettrico",
+  luogo: "Crocetta",
+  indirizzo: "Via Giosuè Carducci 21",
+  codice: "IT001E45094306",
+  pde: "1873",
+  potenza: 3,
+  note: ""
+}, {
+  id: "u-1871",
+  intestatario: "int-annunziata",
+  tipo: "elettrico",
+  luogo: "Garage Chimenti",
+  indirizzo: "Via Giosuè Carducci 36",
+  codice: "IT001E45094324",
+  pde: "1871",
+  potenza: 1,
+  note: "Bassa potenza"
+}, {
+  id: "u-1870",
+  intestatario: "int-annunziata",
+  tipo: "elettrico",
+  luogo: "Chiesa",
+  indirizzo: "Via Largo San Domenico 2",
+  codice: "IT001E44979941",
+  pde: "1870",
+  potenza: 10,
+  note: "Potenza ridotta a 10 kW (bolletta mar 2026, con addebito variazione 23 €). Il registro indicava 25 kW."
+},
+// --- Annunziata: gas
+{
+  id: "u-1885",
+  intestatario: "int-annunziata",
+  tipo: "gas",
+  luogo: "Chiesa",
+  codice: "15104203604751",
+  pde: "1885",
+  potenza: null,
+  note: "DA CHIUDERE?"
+}, {
+  id: "u-1886",
+  intestatario: "int-annunziata",
+  tipo: "gas",
+  luogo: "Via Carducci 44",
+  indirizzo: "Via Giosuè Carducci 44",
+  codice: "15104203603187",
+  pde: "1886",
+  potenza: null,
+  note: "CHIESA O SALA?"
+}, {
+  id: "u-1887",
+  intestatario: "int-annunziata",
+  tipo: "gas",
+  luogo: "Sacrestia San Domenico",
+  indirizzo: "Via San Domenico 1",
+  codice: "15104203604748",
+  pde: "1887",
+  potenza: null,
+  note: ""
+},
+// --- Annunziata: acqua (Acque SpA, dalla bolletta del 01/06/2026)
+{
+  id: "u-acqua-c19",
+  intestatario: "int-annunziata",
+  tipo: "acqua",
+  luogo: "Via Carducci 19 (acqua)",
+  indirizzo: "Via Giosuè Carducci 19",
+  codice: "200005047891",
+  pde: "—",
+  potenza: null,
+  note: "Acque SpA · cod. cliente 1001033069 · contratto 3600811223 · contatore 2025303036. Deposito cauzionale 27,33 € (restituito attivando la domiciliazione)."
+},
+// --- Santa Caterina: elettrico
+{
+  id: "u-1882",
+  intestatario: "int-caterina",
+  tipo: "elettrico",
+  luogo: "Appartamento Resmi",
+  codice: "IT001E40632896",
+  pde: "1882",
+  potenza: 3,
+  note: ""
+}, {
+  id: "u-1881",
+  intestatario: "int-caterina",
+  tipo: "elettrico",
+  luogo: "Ubicazione da definire",
+  codice: "IT001E45092448",
+  pde: "1881",
+  potenza: 3,
+  note: "DA CHIARIRE"
+}, {
+  id: "u-1880",
+  intestatario: "int-caterina",
+  tipo: "elettrico",
+  luogo: "Via Calenzano 22",
+  codice: "IT001E45094368",
+  pde: "1880",
+  potenza: 1.5,
+  note: "DA CHIARIRE SCOPO"
+}, {
+  id: "u-1879",
+  intestatario: "int-caterina",
+  tipo: "elettrico",
+  luogo: "Campane",
+  codice: "IT001E45092449",
+  pde: "1879",
+  potenza: 10,
+  note: "Potenza elevata"
+}, {
+  id: "u-1878",
+  intestatario: "int-caterina",
+  tipo: "elettrico",
+  luogo: "Sala",
+  codice: "IT001E40632895",
+  pde: "1878",
+  potenza: 0.73,
+  note: "Potenza minima"
+},
+// --- Santa Caterina: gas su Enel (scoperte dalle bollette e dal sollecito del 12/06/2026, non erano nel registro)
+{
+  id: "u-enel-cat",
+  intestatario: "int-caterina",
+  tipo: "gas",
+  luogo: "Piazza XX Settembre 8A",
+  indirizzo: "Piazza XX Settembre 8A",
+  codice: "15104203823013",
+  pde: "—",
+  potenza: null,
+  note: "Fornitore Enel, n. cliente 106440451"
+}, {
+  id: "u-enel-107",
+  intestatario: "int-caterina",
+  tipo: "gas",
+  luogo: "Piazza XX Settembre 8C (PDR …0107)",
+  indirizzo: "Piazza XX Settembre 8C",
+  codice: "15104204100107",
+  pde: "—",
+  potenza: null,
+  note: "Fornitore Enel, n. cliente 106440475. Emersa dal sollecito del 12/06/2026."
+}, {
+  id: "u-enel-108",
+  intestatario: "int-caterina",
+  tipo: "gas",
+  luogo: "Piazza XX Settembre 8C (PDR …0108)",
+  indirizzo: "Piazza XX Settembre 8C",
+  codice: "15104204100108",
+  pde: "—",
+  potenza: null,
+  note: "Fornitore Enel, n. cliente 106440489. Emersa dal sollecito del 12/06/2026."
+},
+// --- SS Stefano e Michele: elettrico (intestatario non nel registro originale)
+{
+  id: "u-1919",
+  intestatario: "int-stefano",
+  tipo: "elettrico",
+  luogo: "Piazzetta Santo Stefano 1",
+  indirizzo: "Piazzetta Santo Stefano 1",
+  codice: "IT001E45092716",
+  pde: "1919",
+  potenza: 30,
+  note: "Alta potenza (30 kW) ma consumo quasi nullo"
+},
+// --- San Michele Arcangelo (intestatario non nel registro originale)
+{
+  id: "u-1898",
+  intestatario: "int-michele",
+  tipo: "elettrico",
+  luogo: "Chiesa parrocchiale San Michele (Via Landeschi 3)",
+  indirizzo: "Via G.B. Landeschi 3",
+  codice: "IT001E45091863",
+  pde: "1898",
+  potenza: 3,
+  note: ""
+}, {
+  id: "u-1868",
+  intestatario: "int-michele",
+  tipo: "elettrico",
+  luogo: "Via Capocavallo snc",
+  indirizzo: "Via Capocavallo snc",
+  codice: "IT001E43425085",
+  pde: "1868",
+  potenza: 3,
+  note: ""
+},
+// --- Santa Lucia (intestatario non nel registro originale)
+{
+  id: "u-3425",
+  intestatario: "int-lucia",
+  tipo: "elettrico",
+  luogo: "Via Montegrappa 1",
+  indirizzo: "Via Montegrappa 1",
+  codice: "IT001E45093365",
+  pde: "3425",
+  potenza: 1.5,
+  note: "Fornitura recente (dal 10/07/2025), consumo quasi nullo"
+}];
+const SEED_AZIONI = [{
+  id: "az-1",
+  titolo: "Verifica consumi Gas Chiesa (PDR …4751)",
+  dettaglio: "Accertare se l'utenza è inutilizzata. Se sì, procedere alla chiusura contrattuale per azzerare i costi fissi.",
+  utenza: "u-1885",
+  fatto: false
+}, {
+  id: "az-2",
+  titolo: "Identificazione Via Carducci 44 Gas (PDR …3187)",
+  dettaglio: "Test di accensione o incrocio matricola contatore per capire se alimenta la Chiesa o la Sala.",
+  utenza: "u-1886",
+  fatto: false
+}, {
+  id: "az-3",
+  titolo: "Ubicazione utenza elettrica Santa Caterina (POD …2448)",
+  dettaglio: "Ricercare l'esatta ubicazione fisica del contatore associato al PDE 1881.",
+  utenza: "u-1881",
+  fatto: false
+}, {
+  id: "az-4",
+  titolo: "Scopo Via Calenzano 22 elettricità (POD …4368)",
+  dettaglio: "Identificare cosa alimenta il contatore da 1,5 kW (illuminazione esterna, cancelli o pertinenze comuni).",
+  utenza: "u-1880",
+  fatto: false
+}, {
+  id: "az-5",
+  titolo: "Verificare potenza Piazzetta Santo Stefano (POD …2716)",
+  dettaglio: "Contatore da 30 kW con consumo annuo di soli 17 kWh: si paga ~60 €/mese di sola quota potenza. Valutare se ridurre la potenza impegnata abbatterebbe drasticamente il costo fisso.",
+  utenza: "u-1919",
+  fatto: false
+}, {
+  id: "az-6",
+  titolo: "Fornitura gas Enel Santa Caterina (PDR …3013)",
+  dettaglio: "Questa utenza è su Enel e non era nel registro Energentium. Verificare se va consolidata con lo stesso fornitore delle altre e se il deposito cauzionale di 30 € è recuperabile con la domiciliazione.",
+  utenza: "u-enel-cat",
+  fatto: false
+}, {
+  id: "az-7",
+  titolo: "Sollecito Enel: confermare il pagamento di 662,58 €",
+  dettaglio: "Diffida del 12/06/2026 (protocollo 611600083030) su 12 fatture gas di Santa Caterina, pagate il 12 giugno. Se il pagamento è stato fatto con bonifico, inviare la ricevuta a Enel entro il 17/07/2026 (Area Clienti enel.it o pagamentoriallaccio.enelenergia@enel.com). Tra qualche settimana verificare nell'Area Clienti che l'estratto conto risulti a zero, compreso il residuo di 25,17 € della fattura 5286324741.",
+  utenza: "u-enel-cat",
+  fatto: false
+}, {
+  id: "az-8",
+  titolo: "Pagamenti Enel: valutare la domiciliazione bancaria",
+  dettaglio: "Le tre utenze gas di Santa Caterina si pagano con avviso pagoPA: le scadenze sono sfuggite fino alla diffida. Attivando l'addebito diretto (come per Energentium) il problema non si ripresenta e viene restituito il deposito cauzionale.",
+  utenza: "u-enel-cat",
+  fatto: false
+}, {
+  id: "az-9",
+  titolo: "Verificare variazione potenza Chiesa (PDE 1870)",
+  dettaglio: "La bolletta di marzo 2026 riporta potenza impegnata 10 kW con addebito 'Variazione potenza' di 23 €, mentre il registro indicava 25 kW. Confermare che la riduzione sia voluta e che 10 kW bastino nei picchi (massimo prelevato negli ultimi 12 mesi: 8,70 kW, a novembre).",
+  utenza: "u-1870",
+  fatto: false
+}, {
+  id: "az-10",
+  titolo: "Acque SpA: saldare l'arretrato e la bolletta in corso",
+  dettaglio: "Risulta non pagata la fattura 6026011000213909 (scaduta il 04/04/2026, 68,16 € con mora già addebitata) e la bolletta 6026011000588463 da 118,82 € scade il 01/07/2026. Quest'ultima contiene anche 26,66 € di addebiti extra (richiesta deposito cauzionale + spese di sollecito) ed è in acconto su consumo stimato.",
+  utenza: "u-acqua-c19",
+  fatto: false
+}, {
+  id: "az-11",
+  titolo: "Acque SpA: attivare la domiciliazione bancaria",
+  dettaglio: "Come per Enel, le scadenze con avviso pagoPA sfuggono. Attivando l'SDD (mandato 46N311200005047891, creditor IT380010000005175700482) l'addebito è automatico e Acque restituisce il deposito cauzionale di 27,33 € con gli interessi.",
+  utenza: "u-acqua-c19",
+  fatto: false
+}];
+
+/* ============================================================
+   STORAGE HELPERS (persistenza tra sessioni)
+============================================================ */
+const KEY = "utenze-energia-v1";
+// File unico per entrambi gli ambienti.
+// Dentro Claude esiste window.storage; sul Mac si usa il localStorage del browser.
+const isClaude = typeof window !== "undefined" && !!window.storage;
+async function loadState() {
+  try {
+    if (isClaude) {
+      const r = await window.storage.get(KEY);
+      if (r && r.value) return JSON.parse(r.value);
+    } else {
+      const raw = localStorage.getItem(KEY);
+      if (raw) return JSON.parse(raw);
+    }
+  } catch (e) {/* prima esecuzione */}
+  return null;
+}
+async function saveState(state) {
+  try {
+    if (isClaude) await window.storage.set(KEY, JSON.stringify(state));else localStorage.setItem(KEY, JSON.stringify(state));
+  } catch (e) {
+    console.error("Salvataggio non riuscito", e);
+  }
+}
+
+/* ============================================================
+   COLLEGAMENTO GOOGLE FOGLI (archivio condiviso, opzionale)
+   La configurazione (indirizzo + parola segreta) vive SOLO in questo
+   browser: non entra nel backup .json né viene inviata nel cloud.
+============================================================ */
+const CFG_KEY = "utenze-cloud-cfg";
+function loadCfg() {
+  try {
+    const raw = localStorage.getItem(CFG_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (e) {/* non configurato */}
+  return null;
+}
+function saveCfg(cfg) {
+  try {
+    if (cfg && cfg.url) localStorage.setItem(CFG_KEY, JSON.stringify(cfg));else localStorage.removeItem(CFG_KEY);
+  } catch (e) {/* spazio esaurito */}
+}
+// Le richieste usano Content-Type "text/plain" di proposito: così il browser
+// non invia il controllo CORS preliminare, che Apps Script non gestisce.
+async function cloudChiama(cfg, corpo) {
+  const resp = await fetch(cfg.url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8"
+    },
+    body: JSON.stringify({
+      parola: cfg.parola,
+      ...corpo
+    })
+  });
+  const data = await resp.json();
+  if (!data.ok) throw new Error(data.errore === "parola-errata" ? "Parola segreta errata." : data.errore || "Errore dall'archivio.");
+  return data;
+}
+async function cloudCarica(cfg) {
+  const data = await cloudChiama(cfg, {
+    azione: "carica"
+  });
+  return data.contenuto ? JSON.parse(data.contenuto) : null;
+}
+async function cloudSalva(cfg, stato) {
+  await cloudChiama(cfg, {
+    azione: "salva",
+    contenuto: JSON.stringify(stato)
+  });
+}
+
+/* ============================================================
+   UTIL
+============================================================ */
+const MESI = ["gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic"];
+const eur = n => n == null || isNaN(n) ? "—" : n.toLocaleString("it-IT", {
+  style: "currency",
+  currency: "EUR",
+  maximumFractionDigits: 2
+});
+const num = n => n == null || isNaN(n) ? "—" : n.toLocaleString("it-IT", {
+  maximumFractionDigits: 1
+});
+const uid = () => typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2, 9);
+const oggiISO = () => new Date().toISOString().slice(0, 10);
+// Una bolletta è "scaduta" se non è pagata e la data di scadenza è passata.
+const isScaduta = b => !b.pagata && !!b.scadenza && b.scadenza < oggiISO();
+
+// Link automatico al PDF su Google Drive: una ricerca per nome file esatto.
+// Non serve configurare nulla: basta che il file caricato qui abbia lo stesso
+// nome del file conservato nella cartella delle bollette su Drive.
+const linkDriveAutomatico = fileNome => fileNome ? `https://drive.google.com/drive/search?q=${encodeURIComponent('"' + fileNome + '"')}` : "";
+
+// Dato un link di Google Drive, estrae l'ID del file (se è un link diretto al file).
+// Riconosce i formati: .../file/d/ID/view, ...open?id=ID, ...?id=ID
+const driveFileId = url => {
+  if (!url) return null;
+  const s = String(url);
+  const m = s.match(/\/d\/([a-zA-Z0-9_-]{20,})/) || s.match(/[?&]id=([a-zA-Z0-9_-]{20,})/);
+  return m ? m[1] : null;
+};
+// URL di anteprima incorporabile in un riquadro (iframe): solo per i link diretti al file.
+const drivePreviewUrl = url => {
+  const id = driveFileId(url);
+  return id ? `https://drive.google.com/file/d/${id}/preview` : null;
+};
+// true se il link è una semplice ricerca per nome su Drive (non apre il file esatto).
+const isLinkRicerca = url => /drive\.google\.com\/drive\/search/i.test(String(url || ""));
+
+// Normalizza un codice POD/PDR per il confronto: niente spazi, maiuscolo,
+// e i POD in forma abbreviata (IT1E…, IT01E…) portati alla forma piena IT001E….
+const normEnergia = s => String(s || "").replace(/\s/g, "").toUpperCase().replace(/^IT0{0,2}1E/, "IT001E");
+
+// Unità di misura ed etichetta breve per tipo di utenza (elettrico / gas / acqua)
+const unitaDi = tipo => tipo === "gas" ? "Smc" : tipo === "acqua" ? "mc" : "kWh";
+const tipoBreve = tipo => tipo === "gas" ? "Gas" : tipo === "acqua" ? "Acqua" : "El.";
+
+/* ============================================================
+   MOTORE DI ESTRAZIONE BOLLETTE (ibrido a 3 stadi)
+   Stadio 1: pdf.js estrae il testo in locale (0 token)
+   Stadio 2: parser su pattern Energentium + validazione
+   Stadio 3 (a richiesta): Claude legge il PDF se il parser fallisce
+============================================================ */
+
+// Carica pdf.js da CDN una sola volta
+let pdfjsPromise = null;
+function loadPdfJs() {
+  if (pdfjsPromise) return pdfjsPromise;
+  pdfjsPromise = new Promise((resolve, reject) => {
+    if (window.pdfjsLib) {
+      resolve(window.pdfjsLib);
+      return;
+    }
+    const s = document.createElement("script");
+    s.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+    s.onload = () => {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+      resolve(window.pdfjsLib);
+    };
+    s.onerror = () => reject(new Error("Impossibile caricare il lettore PDF"));
+    document.head.appendChild(s);
+  });
+  return pdfjsPromise;
+}
+
+// Estrae il testo grezzo da un File PDF (in locale, niente AI)
+async function estraiTestoPdf(file) {
+  const pdfjs = await loadPdfJs();
+  const buf = await file.arrayBuffer();
+  const doc = await pdfjs.getDocument({
+    data: buf
+  }).promise;
+  let testo = "";
+  for (let p = 1; p <= doc.numPages; p++) {
+    const page = await doc.getPage(p);
+    const content = await page.getTextContent();
+    testo += content.items.map(i => i.str).join(" ") + "\n";
+  }
+  return testo;
+}
+
+// Divide un PDF che contiene più bollette (es. 7 utenze elettriche in un file)
+// in blocchi separati, uno per ogni "Intestatario:". Se ce n'è una sola, restituisce [testo].
+function splitBollette(testo) {
+  const idx = [...testo.matchAll(/Intestatario:/g)].map(m => m.index);
+  if (idx.length <= 1) return [testo];
+  const blocchi = [];
+  for (let i = 0; i < idx.length; i++) {
+    blocchi.push(testo.slice(idx[i], i + 1 < idx.length ? idx[i + 1] : undefined));
+  }
+  return blocchi;
+}
+
+// Normalizza un numero italiano "1.234,56" -> 1234.56
+function parseNumIt(s) {
+  if (!s) return null;
+  const clean = String(s).replace(/[^\d.,-]/g, "").replace(/\./g, "").replace(",", ".");
+  const n = parseFloat(clean);
+  return isNaN(n) ? null : n;
+}
+
+// Converte date varie -> ISO yyyy-mm-dd
+function toISO(s) {
+  if (!s) return "";
+  const m = s.match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/);
+  if (!m) return "";
+  let [, d, mo, y] = m;
+  if (y.length === 2) y = "20" + y;
+  return `${y}-${mo.padStart(2, "0")}-${d.padStart(2, "0")}`;
+}
+const MESI_ABBR = {
+  gen: 1,
+  feb: 2,
+  mar: 3,
+  apr: 4,
+  mag: 5,
+  giu: 6,
+  lug: 7,
+  ago: 8,
+  set: 9,
+  ott: 10,
+  nov: 11,
+  dic: 12
+};
+const vuoto = () => ({
+  valore: "",
+  conf: "vuoto"
+});
+const ultimoGiorno = (anno, mese) => new Date(anno, mese, 0).getDate();
+
+// Riconosce il fornitore dalle parole-chiave nel testo
+function riconosciFornitore(testo) {
+  const t = testo.toLowerCase();
+  if (t.includes("energentium")) return "energentium";
+  if (t.includes("acque spa") || t.includes("acque.net")) return "acque";
+  if (t.includes("enel energia") || t.includes("enel.it")) return "enel";
+  return "sconosciuto";
+}
+
+/* PARSER ENERGENTIUM.
+   Nel testo lineare i tre valori importo/scadenza/consumo finiscono separati
+   dalle etichette: li recupero da pattern ancorati nello scontrino. */
+function parseEnergentium(testo) {
+  const tFlat = testo.replace(/\s+/g, " ");
+  const out = {};
+  const podLab = tFlat.match(/Codice POD[:\s]+(IT\s?0{0,2}1E\s?\d{8,9})/i);
+  const pdrLab = tFlat.match(/Codice PDR[:\s]+(\d{14,15})/i);
+  const pod = tFlat.match(/IT\s?0{0,2}1E\s?\d{8,9}/i);
+  const pdrAny = tFlat.match(/\b\d{14,15}\b/);
+  out.codice = podLab ? {
+    valore: podLab[1].replace(/\s/g, ""),
+    conf: "ok"
+  } : pdrLab ? {
+    valore: pdrLab[1],
+    conf: "ok"
+  } : pod ? {
+    valore: pod[0].replace(/\s/g, ""),
+    conf: "ok"
+  } : pdrAny ? {
+    valore: pdrAny[0],
+    conf: "incerto"
+  } : vuoto();
+
+  // tipo: il modo affidabile è guardare il codice estratto (un POD inizia con IT...E,
+  // un PDR è di 14-15 cifre). Il testo standard dei reclami cita "energia elettrica"
+  // anche nelle bollette gas, quindi NON va usato come indizio.
+  const cod = out.codice?.valore || "";
+  out._tipo = /^IT/i.test(cod) ? "elettrico" : /^\d{14,15}$/.test(cod) ? "gas" : /GAS\s+NATURALE/i.test(tFlat) ? "gas" : /\d\s*kWh\s*x/i.test(tFlat) ? "elettrico" : "gas";
+
+  // Riquadro di sintesi in prima pagina. Esistono due ordini di impaginazione del
+  // testo estratto, entrambi reali e qui supportati:
+  //  (A) "...CONSUMO 312,12 11 194 Euro Maggio 2026"   → importo, giorno, consumo, Euro, mese, anno
+  //  (B) "...CONSUMO 65,33 Euro 08 Luglio 2026 157 kWh" → importo, Euro, giorno, mese, anno, consumo
+  // Le normalizzo in un'unica struttura `box` con i campi { importo, giorno, mese, anno, consumo }.
+  const _mesiBox = "Gennaio|Febbraio|Marzo|Aprile|Maggio|Giugno|Luglio|Agosto|Settembre|Ottobre|Novembre|Dicembre";
+  const boxA = tFlat.match(/IMPORTO DA PAGARE\s+SCADENZA\s+CONSUMO\s+([\d.]+,\d{2})\s+(\d{1,2})\s+([\d.]+)\s+Euro/i);
+  const boxB = tFlat.match(new RegExp(`IMPORTO DA PAGARE\\s+SCADENZA\\s+CONSUMO\\s+([\\d.]+,\\d{2})\\s+Euro\\s+(\\d{1,2})\\s+(${_mesiBox})\\s+(20\\d{2})\\s+([\\d.]+)`, "i"));
+  const box = boxA ? {
+    importo: boxA[1],
+    giorno: boxA[2],
+    consumo: boxA[3],
+    mese: null,
+    anno: null
+  } : boxB ? {
+    importo: boxB[1],
+    giorno: boxB[2],
+    mese: boxB[3],
+    anno: boxB[4],
+    consumo: boxB[5]
+  } : null;
+  // Compatibilità: codice esistente più sotto usa ancora `boxSintesi` con indici [1]=importo,[2]=giorno,[3]=consumo.
+  const boxSintesi = box ? [box.importo + " " + box.giorno + " " + box.consumo, box.importo, box.giorno, box.consumo] : null;
+  const per = tFlat.match(/Periodo oggetto di fatturazione[:\s]+(\d{2}\/\d{2}\/\d{4})\s*-\s*(\d{2}\/\d{2}\/\d{4})/i);
+  if (per) {
+    out.dataInizio = {
+      valore: toISO(per[1]),
+      conf: "ok"
+    };
+    out.dataFine = {
+      valore: toISO(per[2]),
+      conf: "ok"
+    };
+  } else {
+    out.dataInizio = vuoto();
+    out.dataFine = vuoto();
+  }
+
+  // Consumo: prima il riquadro di sintesi, poi la griglia "OFFERTA IMP GG CONS",
+  // poi lo scontrino ("190 kWh x" / "194 Smc x"), poi il totale fatturato.
+  const grigliaCons = tFlat.match(/PRAEMIUM\s+([\d.]+,\d{2})\s+(\d{1,2})\s+(\d+)\s/i);
+  let cons = boxSintesi ? boxSintesi[3] : grigliaCons ? grigliaCons[3] : (tFlat.match(/([\d.]+)\s*kWh\s*x/i) || [])[1] || (tFlat.match(/([\d.]+)\s*Smc\s*x/i) || [])[1] || (tFlat.match(/TOTALE CONSUMO FATTURATO Smc\s+([\d.]+)/i) || [])[1] || (tFlat.match(/Quota per consumi\s+([\d.]+)\s*kWh/i) || [])[1];
+  out.consumo = cons != null ? {
+    valore: String(parseNumIt(cons)),
+    conf: "ok"
+  } : vuoto();
+  let imp = tFlat.match(/TOTALE DA PAGARE\s*=?\s*([\d.]+,\d{2})/i) || boxSintesi && [boxSintesi[0], boxSintesi[1]] || tFlat.match(/IMPORTO DA PAGARE\s+SCADENZA\s+CONSUMO[\s\S]{0,80}?([\d.]+,\d{2})/i);
+  out.importo = imp ? {
+    valore: String(parseNumIt(imp[1])),
+    conf: "ok"
+  } : vuoto();
+
+  // VERIFICA INCROCIATA (doppia lettura): l'importo nel riquadro di prima pagina
+  // e il "TOTALE DA PAGARE" dello scontrino devono coincidere; idem il consumo
+  // tra riquadro e dettaglio ("190 kWh x" / "194 Smc x"). Se divergono, la lettura
+  // è marcata incerta e l'avviso obbliga a un controllo manuale.
+  const totDettaglio = tFlat.match(/TOTALE DA PAGARE\s*=?\s*([\d.]+,\d{2})/i);
+  if (boxSintesi && totDettaglio && Math.abs(parseNumIt(boxSintesi[1]) - parseNumIt(totDettaglio[1])) > 0.005) {
+    out.importo.conf = "incerto";
+    out._avvisoExtra = `Importo discordante tra prima pagina (${boxSintesi[1]} €) e totale di dettaglio (${totDettaglio[1]} €): verifica sul PDF.`;
+  }
+  const consDettaglio = (tFlat.match(/([\d.]+)\s*kWh\s*x/i) || tFlat.match(/([\d.]+)\s*Smc\s*x/i) || [])[1];
+  if (boxSintesi && consDettaglio != null && parseNumIt(consDettaglio) !== parseNumIt(boxSintesi[3])) {
+    out.consumo.conf = "incerto";
+    out._avvisoExtra = (out._avvisoExtra ? out._avvisoExtra + " " : "") + `Consumo discordante tra prima pagina (${boxSintesi[3]}) e dettaglio (${consDettaglio}): verifica sul PDF.`;
+  }
+
+  // Scadenza: se il box è in formato (B) ho già giorno+mese+anno lì (fonte più affidabile).
+  // Altrimenti giorno dal box/griglia e mese+anno dal testo ("...Maggio...2026").
+  const mesiNomi = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
+  if (box && box.mese && box.anno) {
+    const mIdx = mesiNomi.indexOf(box.mese.toLowerCase()) + 1;
+    out.scadenza = {
+      valore: `${box.anno}-${String(mIdx).padStart(2, "0")}-${String(box.giorno).padStart(2, "0")}`,
+      conf: "ok"
+    };
+  } else {
+    const meseAnno = tFlat.match(new RegExp(`(${_mesiBox}).{0,30}?(20\\d{2})`, "i"));
+    const giornoScad = boxSintesi ? boxSintesi[2] : grigliaCons ? grigliaCons[2] : (tFlat.match(/([\d.]+,\d{2})\s+(\d{1,2})\s+\d/) || [])[2];
+    if (meseAnno && giornoScad) {
+      const mIdx = mesiNomi.indexOf(meseAnno[1].toLowerCase()) + 1;
+      out.scadenza = {
+        valore: `${meseAnno[2]}-${String(mIdx).padStart(2, "0")}-${String(giornoScad).padStart(2, "0")}`,
+        conf: "incerto"
+      };
+    } else out.scadenza = vuoto();
+  }
+  const nf = tFlat.match(/nr\.\s*([\d\-]+)\s+del/i);
+  out.numero = nf ? {
+    valore: nf[1],
+    conf: "ok"
+  } : vuoto();
+  const qf = tFlat.match(/Quota fissa(?:\s+e\s+Quota potenza)?\s+\d+\s*mes[ei]?\s*x?\s*[\d.,]+\s*€?\/?mese\s*\+?\s*([\d.]+,\d{2})/i);
+  out.quotaFissa = qf ? {
+    valore: String(parseNumIt(qf[1])),
+    conf: "incerto"
+  } : vuoto();
+
+  // Partite in accredito (es. "Restituzione Crediti -21,95", conguagli a credito): abbassano
+  // il totale e possono renderlo inferiore alla sola quota fissa. Va segnalato alla validazione
+  // perché non scambi questo caso reale per un errore di lettura.
+  out._haAccredito = /Restituzione Crediti\s*-/i.test(tFlat) || /Conguaglio[^+]{0,20}-\s*[\d.]+,\d{2}/i.test(tFlat);
+  return out;
+}
+
+/* PARSER ENEL.
+   Periodo a parole ("SET. 2025 - OTT. 2025"), PDR nello scontrino,
+   importo separato dalla valuta, presenza deposito cauzionale. */
+function parseEnel(testo) {
+  const tFlat = testo.replace(/\s+/g, " ");
+  const out = {};
+  const pdr = tFlat.match(/PDR[:\s]+(\d{14,15})/i) || tFlat.match(/\b\d{14,15}\b/);
+  out.codice = pdr ? {
+    valore: pdr[1] || pdr[0],
+    conf: pdr[1] ? "ok" : "incerto"
+  } : vuoto();
+  const per = tFlat.match(/Periodo\s+([A-Z]{3})\.?\s*(\d{4})\s*-\s*([A-Z]{3})\.?\s*(\d{4})/i);
+  if (per) {
+    const m1 = MESI_ABBR[per[1].toLowerCase()],
+      m2 = MESI_ABBR[per[3].toLowerCase()];
+    if (m1 && m2) {
+      out.dataInizio = {
+        valore: `${per[2]}-${String(m1).padStart(2, "0")}-01`,
+        conf: "incerto"
+      };
+      out.dataFine = {
+        valore: `${per[4]}-${String(m2).padStart(2, "0")}-${ultimoGiorno(+per[4], m2)}`,
+        conf: "incerto"
+      };
+    } else {
+      out.dataInizio = vuoto();
+      out.dataFine = vuoto();
+    }
+  } else {
+    out.dataInizio = vuoto();
+    out.dataFine = vuoto();
+  }
+  let cons = tFlat.match(/([\d.]+)\s*Smc\s+Consumi Rilevati/i) || tFlat.match(/Consumo fatturato[\s\S]{0,40}?([\d.]+)\s*Smc/i) || tFlat.match(/Quota consumi\s+([\d.]+)\s*Smc/i);
+  out.consumo = cons ? {
+    valore: String(parseNumIt(cons[1])),
+    conf: "ok"
+  } : vuoto();
+  let imp = tFlat.match(/TOTALE DA PAGARE\s+([\d.]+,\d{2})/i) || tFlat.match(/Importo da pagare\s+Consumo\s+([\d.]+,\d{2})/i) || tFlat.match(/Importo da pagare[\s\S]{0,30}?([\d.]+,\d{2})/i);
+  out.importo = imp ? {
+    valore: String(parseNumIt(imp[1])),
+    conf: "ok"
+  } : vuoto();
+  out._tipo = /GAS\s*NATURALE|\bSmc\b/i.test(tFlat) ? "gas" : "elettrico";
+
+  // VERIFICA INCROCIATA (doppia lettura): "TOTALE DA PAGARE" del dettaglio e il
+  // riquadro "Importo da pagare" di prima pagina devono coincidere.
+  const totA = tFlat.match(/TOTALE DA PAGARE\s+([\d.]+,\d{2})/i);
+  const totB = tFlat.match(/Importo da pagare[\s\S]{0,30}?([\d.]+,\d{2})/i);
+  if (totA && totB && Math.abs(parseNumIt(totA[1]) - parseNumIt(totB[1])) > 0.005) {
+    out.importo.conf = "incerto";
+    out._avvisoExtra = `Importo discordante tra le sezioni della bolletta (${totA[1]} vs ${totB[1]} €): verifica sul PDF.`;
+  }
+  const scad = tFlat.match(/Scadenza\s+(\d{2}\/\d{2}\/\d{4})/i);
+  out.scadenza = scad ? {
+    valore: toISO(scad[1]),
+    conf: "ok"
+  } : vuoto();
+  const nf = tFlat.match(/fattura elettronica n\.\s*(\d+)/i);
+  out.numero = nf ? {
+    valore: nf[1],
+    conf: "ok"
+  } : vuoto();
+  const qf = tFlat.match(/QUOTA FISSA\s+([\d.]+,\d{2})/i);
+  out.quotaFissa = qf ? {
+    valore: String(parseNumIt(qf[1])),
+    conf: "incerto"
+  } : vuoto();
+  out._depositoCauzionale = /DEPOSITO CAUZIONALE/i.test(tFlat);
+  return out;
+}
+
+/* PARSER ACQUE SPA (servizio idrico).
+   Codice utenza a 12 cifre, periodo "25/02/2026 - 22/05/2026",
+   consumo in mc, scadenza "entro il gg/mm/aaaa". */
+function parseAcque(testo) {
+  const tFlat = testo.replace(/\s+/g, " ");
+  const out = {};
+  const cu = tFlat.match(/CODICE UTENZA[:\s]+(\d{10,14})/i);
+  out.codice = cu ? {
+    valore: cu[1],
+    conf: "ok"
+  } : vuoto();
+  out._tipo = "acqua";
+
+  // il testo estratto può intercalare altre colonne tra etichetta e date:
+  // "Periodo di riferimento 6026011000588463 01/06/2026 trimestrale 25/02/2026 - 22/05/2026"
+  const per = tFlat.match(/Periodo di riferimento[\s\S]{0,80}?(\d{2}\/\d{2}\/\d{4})\s*-\s*(\d{2}\/\d{2}\/\d{4})/i) || tFlat.match(/(\d{2}\/\d{2}\/\d{4})\s*-\s*(\d{2}\/\d{2}\/\d{4})/);
+  if (per) {
+    out.dataInizio = {
+      valore: toISO(per[1]),
+      conf: "ok"
+    };
+    out.dataFine = {
+      valore: toISO(per[2]),
+      conf: "ok"
+    };
+  } else {
+    out.dataInizio = vuoto();
+    out.dataFine = vuoto();
+  }
+  const cons = tFlat.match(/Consumo fatturato\s+([\d.,]+)\s*mc/i) || tFlat.match(/consumo\s+totale[\s\S]{0,30}?([\d.,]+)\s*mc/i);
+  out.consumo = cons ? {
+    valore: String(parseNumIt(cons[1])),
+    conf: "ok"
+  } : vuoto();
+  const imp = tFlat.match(/TOTALE FATTURA\s+([\d.]+,\d{2})/i) || tFlat.match(/TOTALE DA PAGARE\s+([\d.]+,\d{2})/i);
+  out.importo = imp ? {
+    valore: String(parseNumIt(imp[1])),
+    conf: "ok"
+  } : vuoto();
+
+  // VERIFICA INCROCIATA (doppia lettura): "TOTALE FATTURA" e "TOTALE DA PAGARE" devono coincidere.
+  const totF = tFlat.match(/TOTALE FATTURA\s+([\d.]+,\d{2})/i);
+  const totP = tFlat.match(/TOTALE DA PAGARE\s+([\d.]+,\d{2})/i);
+  if (totF && totP && Math.abs(parseNumIt(totF[1]) - parseNumIt(totP[1])) > 0.005) {
+    out.importo.conf = "incerto";
+    out._avvisoExtra = `Importo discordante tra TOTALE FATTURA (${totF[1]} €) e TOTALE DA PAGARE (${totP[1]} €): verifica sul PDF.`;
+  }
+  const scad = tFlat.match(/entro il\s+(\d{2}\/\d{2}\/\d{4})/i);
+  out.scadenza = scad ? {
+    valore: toISO(scad[1]),
+    conf: "ok"
+  } : vuoto();
+  const nf = tFlat.match(/Numero Fattura\s+(\d+)/i) || tFlat.match(/Bolletta n\.\s*(\d+)/i);
+  out.numero = nf ? {
+    valore: nf[1],
+    conf: "ok"
+  } : vuoto();
+  const qf = tFlat.match(/QUOTA FISSA\s+([\d.]+,\d{2})/i);
+  out.quotaFissa = qf ? {
+    valore: String(parseNumIt(qf[1])),
+    conf: "incerto"
+  } : vuoto();
+
+  // Avvisi specifici del servizio idrico
+  if (/Stima/i.test(tFlat) && /IN ACCONTO/i.test(tFlat)) {
+    out._avvisoExtra = (out._avvisoExtra ? out._avvisoExtra + " " : "") + "Bolletta in ACCONTO su consumo STIMATO: l'importo verrà conguagliato con la prossima lettura reale.";
+  }
+  const insoluti = tFlat.match(/n[°o]\s*(\d+)\s+documenti precedenti per un totale di euro\s+([\d.]+,\d{2})\s+non pagati/i);
+  if (insoluti) {
+    out._avvisoExtra = (out._avvisoExtra ? out._avvisoExtra + " " : "") + `Attenzione: il fornitore segnala ${insoluti[1]} fattur${insoluti[1] === "1" ? "a precedente non pagata" : "e precedenti non pagate"} per ${insoluti[2]} €.`;
+  }
+  return out;
+}
+
+/* DISPATCHER: riconosce il fornitore e applica il parser dedicato. */
+function parseBolletta(testo) {
+  const fornitore = riconosciFornitore(testo);
+  let campi;
+  if (fornitore === "energentium") campi = parseEnergentium(testo);else if (fornitore === "enel") campi = parseEnel(testo);else if (fornitore === "acque") campi = parseAcque(testo);else campi = {
+    codice: vuoto(),
+    dataInizio: vuoto(),
+    dataFine: vuoto(),
+    consumo: vuoto(),
+    importo: vuoto(),
+    numero: vuoto(),
+    scadenza: vuoto(),
+    quotaFissa: vuoto()
+  };
+  campi._fornitore = fornitore;
+  return campi;
+}
+
+/* VALIDAZIONE: controlla coerenza e produce avvisi.
+   È la "verifica" che impedisce salvataggi sbagliati in silenzio.
+   tipoUtenza (opzionale) è il tipo dell'utenza abbinata, per il controllo incrociato. */
+function validaEstrazione(campi, tipoUtenza) {
+  const avvisi = [];
+  const di = campi.dataInizio?.valore,
+    df = campi.dataFine?.valore;
+  if (di && df && di > df) avvisi.push("Il periodo finisce prima di iniziare: controlla le date.");
+  if (di && df && di <= df) {
+    const gg = Math.round((new Date(df) - new Date(di)) / 86400000);
+    if (gg < 15 || gg > 190) avvisi.push(`Periodo di ${gg} giorni: insolito per una bolletta (di norma 1–3 mesi), controlla le date.`);
+  }
+  const imp = parseFloat(campi.importo?.valore);
+  if (!isNaN(imp) && (imp <= 0 || imp > 50000)) avvisi.push("Importo fuori dai valori plausibili: verificalo.");
+  const cons = parseFloat(campi.consumo?.valore);
+  if (!isNaN(cons) && cons < 0) avvisi.push("Consumo negativo: verificalo.");
+  if (!isNaN(cons) && cons > 100000) avvisi.push("Consumo enorme: probabile errore di lettura, verificalo.");
+  const scad = campi.scadenza?.valore;
+  if (scad && df && scad < df) avvisi.push("La scadenza è prima della fine del periodo fatturato: verifica le date.");
+  if (scad && di && new Date(scad) - new Date(di) > 400 * 86400000) avvisi.push("Scadenza a più di un anno dal periodo: verificala.");
+  const qf = parseFloat(campi.quotaFissa?.valore);
+  if (!campi._haAccredito && !isNaN(qf) && !isNaN(imp) && qf > imp + 0.005) avvisi.push("La quota fissa supera l'importo totale: uno dei due è letto male.");
+
+  // Prezzo medio al consumo entro l'intervallo tipico per il tipo di fornitura.
+  // Limiti larghi (per non disturbare le bollette piccole, dove la quota fissa pesa),
+  // pensati per intercettare scambi di campo, non scostamenti tariffari.
+  // Saltato in presenza di accrediti (restituzioni/conguagli), che rendono il calcolo non significativo.
+  const tipo = tipoUtenza || campi._tipo;
+  if (!campi._haAccredito && !isNaN(cons) && cons >= 5 && !isNaN(imp) && imp > 0 && tipo) {
+    const range = {
+      elettrico: [0.05, 3],
+      gas: [0.2, 12],
+      acqua: [0.8, 40]
+    }[tipo];
+    if (range) {
+      const p = (imp - (isNaN(qf) ? 0 : qf)) / cons;
+      const unita = unitaDi(tipo);
+      if (p < range[0] || p > range[1]) avvisi.push(`Prezzo medio anomalo (${p.toLocaleString("it-IT", {
+        maximumFractionDigits: 2
+      })} €/${unita}, atteso ${range[0]}–${range[1]}): consumo o importo potrebbero essere letti male.`);
+    }
+  }
+
+  // Coerenza tipo bolletta ↔ tipo utenza abbinata
+  if (tipoUtenza && campi._tipo && tipoUtenza !== campi._tipo) {
+    avvisi.push(`La bolletta sembra di tipo "${campi._tipo}" ma l'utenza abbinata è "${tipoUtenza}": controlla l'abbinamento.`);
+  }
+  const mancanti = ["codice", "dataInizio", "dataFine", "consumo", "importo"].filter(k => !campi[k] || campi[k].conf === "vuoto");
+  return {
+    avvisi,
+    mancanti,
+    leggibile: mancanti.length <= 2
+  };
+}
+
+/* RIPIEGO AI: chiama Claude solo su richiesta esplicita.
+   Manda il PDF in base64 e chiede un JSON con i campi. */
+async function leggiConAI(file) {
+  if (!isClaude) {
+    throw new Error("La lettura con AI è disponibile solo dentro Claude. Qui usa la lettura locale o inserisci i dati a mano.");
+  }
+  const base64 = await new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(",")[1]);
+    r.onerror = () => rej(new Error("Lettura del file non riuscita"));
+    r.readAsDataURL(file);
+  });
+  const prompt = `Sei un estrattore di dati da bollette di energia elettrica o gas. Leggi il PDF e restituisci ESCLUSIVAMENTE un oggetto JSON, senza testo prima o dopo, senza backtick, con questi campi:
+{"codice": "POD (IT001E...) o PDR (14-15 cifre)", "dataInizio": "yyyy-mm-dd inizio periodo", "dataFine": "yyyy-mm-dd fine periodo", "consumo": numero del consumo in kWh o Smc, "importo": numero totale in euro, "numero": "numero fattura"}
+Se un campo non è presente, usa stringa vuota o null. Usa il punto come separatore decimale.`;
+  const resp = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 1000,
+      messages: [{
+        role: "user",
+        content: [{
+          type: "document",
+          source: {
+            type: "base64",
+            media_type: "application/pdf",
+            data: base64
+          }
+        }, {
+          type: "text",
+          text: prompt
+        }]
+      }]
+    })
+  });
+  const data = await resp.json();
+  const txt = (data.content || []).filter(b => b.type === "text").map(b => b.text).join("").replace(/```json|```/g, "").trim();
+  const j = JSON.parse(txt);
+  const wrap = v => ({
+    valore: v == null ? "" : String(v),
+    conf: "ai"
+  });
+  return {
+    codice: wrap(j.codice),
+    dataInizio: wrap(j.dataInizio),
+    dataFine: wrap(j.dataFine),
+    consumo: wrap(j.consumo),
+    importo: wrap(j.importo),
+    numero: wrap(j.numero)
+  };
+}
+
+/* ============================================================
+   APP
+============================================================ */
+function App() {
+  const [ready, setReady] = useState(false);
+  const [intestatari, setIntestatari] = useState(SEED_INTESTATARI);
+  const [utenze, setUtenze] = useState(SEED_UTENZE);
+  const [bollette, setBollette] = useState([]);
+  const [azioni, setAzioni] = useState(SEED_AZIONI);
+  const [impostazioni, setImpostazioni] = useState({
+    driveFolder: "",
+    ultimoBackup: null
+  });
+  const [tab, setTab] = useState("utenze");
+  // finestra di conferma/avviso interna all'app (sostituisce alert/confirm,
+  // che dentro Claude vengono bloccati dal browser)
+  const [dialog, setDialog] = useState(null); // { titolo, messaggio, onConferma?, etichettaConferma? }
+  // collegamento opzionale all'archivio su Google Fogli
+  const [cfg, setCfg] = useState(null); // { url, parola } oppure null
+  const [sync, setSync] = useState({
+    stato: "idle",
+    quando: null,
+    msg: ""
+  }); // stato: idle | lavoro | ok | errore
+  const [cloudModal, setCloudModal] = useState(false);
+  const [cloudPronto, setCloudPronto] = useState(false); // true quando il primo caricamento dal cloud è stato tentato
+  const cloudTimer = useRef(null);
+
+  // applica un archivio (locale o dal cloud) allo stato dell'app
+  const applicaStato = useCallback(s => {
+    setIntestatari(s.intestatari ?? SEED_INTESTATARI);
+    setUtenze(s.utenze ?? SEED_UTENZE);
+    setBollette(s.bollette ?? []);
+    setAzioni(s.azioni ?? SEED_AZIONI);
+    setImpostazioni(s.impostazioni ?? {
+      driveFolder: "",
+      ultimoBackup: null
+    });
+  }, []);
+
+  // carica: prima il salvataggio locale, poi (se configurato) l'archivio su Google
+  useEffect(() => {
+    (async () => {
+      const locale = await loadState();
+      if (locale) applicaStato(locale);
+      const c = loadCfg();
+      if (c) setCfg(c);
+      if (c && c.url) {
+        try {
+          setSync({
+            stato: "lavoro",
+            quando: null,
+            msg: "Carico dall'archivio Google…"
+          });
+          const remoto = await cloudCarica(c);
+          if (remoto) applicaStato(remoto);
+          setSync({
+            stato: "ok",
+            quando: Date.now(),
+            msg: remoto ? "Caricato dall'archivio Google" : "Archivio Google vuoto: uso i dati locali"
+          });
+        } catch (e) {
+          setSync({
+            stato: "errore",
+            quando: null,
+            msg: "Archivio Google non raggiungibile: lavoro con i dati locali"
+          });
+        }
+      }
+      setReady(true);
+      setCloudPronto(true);
+    })();
+  }, [applicaStato]);
+
+  // salva ad ogni modifica: sempre in locale; nel cloud se configurato (con piccola attesa)
+  useEffect(() => {
+    if (!ready) return;
+    const stato = {
+      intestatari,
+      utenze,
+      bollette,
+      azioni,
+      impostazioni
+    };
+    saveState(stato);
+    if (!cloudPronto || !cfg || !cfg.url) return;
+    clearTimeout(cloudTimer.current);
+    cloudTimer.current = setTimeout(async () => {
+      try {
+        setSync(s => ({
+          ...s,
+          stato: "lavoro",
+          msg: "Salvataggio nell'archivio Google…"
+        }));
+        await cloudSalva(cfg, stato);
+        setSync({
+          stato: "ok",
+          quando: Date.now(),
+          msg: "Salvato nell'archivio Google"
+        });
+      } catch (e) {
+        setSync({
+          stato: "errore",
+          quando: null,
+          msg: "Salvataggio Google non riuscito (i dati restano salvati in locale)"
+        });
+      }
+    }, 1500);
+  }, [ready, cloudPronto, cfg, intestatari, utenze, bollette, azioni, impostazioni]);
+  const azioniAperte = azioni.filter(a => !a.fatto).length;
+  const bolletteScadute = bollette.filter(isScaduta).length;
+  if (!ready) {
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        minHeight: "100vh",
+        background: C.bg,
+        display: "grid",
+        placeItems: "center",
+        fontFamily: fontBody,
+        color: C.inkSoft
+      }
+    }, "Apertura del registro…");
+  }
+  const TABS = [{
+    id: "utenze",
+    label: "Utenze",
+    icon: Building2
+  }, {
+    id: "bollette",
+    label: "Bollette",
+    icon: FileText,
+    badge: bolletteScadute
+  }, {
+    id: "consumi",
+    label: "Analisi consumi",
+    icon: BarChart3
+  }, {
+    id: "azioni",
+    label: "Azioni aperte",
+    icon: ClipboardList,
+    badge: azioniAperte
+  }];
+  const exportCSV = () => {
+    const nomeInt = id => intestatari.find(i => i.id === id)?.nome ?? "";
+    const utLabel = id => {
+      const u = utenze.find(x => x.id === id);
+      return u ? `${u.luogo} (PDE ${u.pde})` : "";
+    };
+    const esc = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    let csv = "REGISTRO UTENZE\n";
+    csv += ["Intestatario", "Tipo", "Soprannome", "Indirizzo", "POD/PDR", "PDE", "Potenza kW", "Note"].map(esc).join(";") + "\n";
+    utenze.forEach(u => {
+      csv += [nomeInt(u.intestatario), u.tipo, u.luogo, u.indirizzo ?? "", u.codice, u.pde, u.potenza ?? "", u.note].map(esc).join(";") + "\n";
+    });
+    csv += "\nBOLLETTE\n";
+    csv += ["Utenza", "Periodo dal", "Periodo al", "Consumo", "Importo", "Quota fissa", "N fattura", "Scadenza", "Pagata"].map(esc).join(";") + "\n";
+    bollette.forEach(b => {
+      csv += [utLabel(b.utenza), b.dataInizio, b.dataFine, b.consumo, b.importo, b.quotaFissa ?? "", b.numero, b.scadenza, b.pagata ? "Sì" : "No"].map(esc).join(";") + "\n";
+    });
+    const blob = new Blob(["\uFEFF" + csv], {
+      type: "text/csv;charset=utf-8;"
+    });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `registro-utenze-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+  };
+
+  // BACKUP COMPLETO: scarica tutto l'archivio in un file JSON ripristinabile.
+  const exportBackup = () => {
+    const payload = {
+      app: "gestione-utenze",
+      versione: 1,
+      data: new Date().toISOString(),
+      intestatari,
+      utenze,
+      bollette,
+      azioni,
+      impostazioni
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {
+      type: "application/json"
+    });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `backup-utenze-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    setImpostazioni(s => ({
+      ...s,
+      ultimoBackup: oggiISO()
+    }));
+  };
+
+  // SCADENZE SUL CALENDARIO: esporta le bollette non pagate con scadenza
+  // in un file .ics da importare in Calendario (Mac) o Google Calendar.
+  const exportICS = () => {
+    const daPagare = bollette.filter(b => !b.pagata && b.scadenza);
+    if (!daPagare.length) {
+      setDialog({
+        titolo: "Nessuna scadenza da esportare",
+        messaggio: "Tutte le bollette con una data di scadenza risultano pagate."
+      });
+      return;
+    }
+    const utLabel = id => {
+      const u = utenze.find(x => x.id === id);
+      return u ? `${u.luogo} (${u.tipo === "gas" ? "Gas" : u.tipo === "acqua" ? "Acqua" : "Elettrico"})` : "utenza";
+    };
+    const stamp = new Date().toISOString().replace(/[-:.]/g, "").slice(0, 15) + "Z";
+    let ics = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Gestione Utenze//IT\r\nCALSCALE:GREGORIAN\r\n";
+    daPagare.forEach(b => {
+      const d = b.scadenza.replace(/-/g, "");
+      // promemoria il giorno stesso + evento di un giorno intero
+      ics += "BEGIN:VEVENT\r\n";
+      ics += `UID:bolletta-${b.id}@gestione-utenze\r\n`;
+      ics += `DTSTAMP:${stamp}\r\n`;
+      ics += `DTSTART;VALUE=DATE:${d}\r\n`;
+      ics += `SUMMARY:Scade bolletta ${utLabel(b.utenza)} — ${eur(parseFloat(b.importo))}\r\n`;
+      ics += `DESCRIPTION:Fattura n. ${b.numero || "—"} · periodo ${b.dataInizio || "?"} → ${b.dataFine || "?"}\r\n`;
+      ics += "BEGIN:VALARM\r\nTRIGGER:-P2D\r\nACTION:DISPLAY\r\nDESCRIPTION:Bolletta in scadenza tra 2 giorni\r\nEND:VALARM\r\n";
+      ics += "END:VEVENT\r\n";
+    });
+    ics += "END:VCALENDAR\r\n";
+    const blob = new Blob([ics], {
+      type: "text/calendar;charset=utf-8"
+    });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `scadenze-bollette-${oggiISO()}.ics`;
+    a.click();
+    setDialog({
+      titolo: "Scadenze esportate",
+      messaggio: `Ho creato un file con ${daPagare.length} scadenz${daPagare.length === 1 ? "a" : "e"}. Aprilo con doppio clic per aggiungerle al Calendario del Mac, o importalo in Google Calendar.`
+    });
+  };
+
+  // RIPRISTINO: legge un file di backup e sostituisce l'archivio (previa conferma).
+  // Prima di sovrascrivere scarica automaticamente una copia di sicurezza dei dati attuali.
+  const importBackup = async file => {
+    if (!file) return;
+    try {
+      const testo = await file.text();
+      const p = JSON.parse(testo);
+      if (p.app !== "gestione-utenze" || !Array.isArray(p.utenze) || !Array.isArray(p.bollette)) {
+        setDialog({
+          titolo: "File non valido",
+          messaggio: "Questo file non sembra un backup del registro utenze."
+        });
+        return;
+      }
+      const quando = p.data ? new Date(p.data).toLocaleDateString("it-IT") : "data sconosciuta";
+      setDialog({
+        titolo: "Ripristinare il backup?",
+        messaggio: `Backup del ${quando}. I dati attuali (${bollette.length} bollette, ${utenze.length} utenze) verranno sostituiti. Prima della sostituzione scaricherò automaticamente una copia di sicurezza dei dati attuali.`,
+        etichettaConferma: "Ripristina",
+        onConferma: () => {
+          exportBackup(); // rete di sicurezza: copia dei dati attuali prima di sovrascrivere
+          setIntestatari(p.intestatari ?? SEED_INTESTATARI);
+          setUtenze(p.utenze);
+          setBollette(p.bollette);
+          setAzioni(p.azioni ?? []);
+          setImpostazioni(p.impostazioni ?? {
+            driveFolder: "",
+            ultimoBackup: oggiISO()
+          });
+          setDialog({
+            titolo: "Fatto",
+            messaggio: "Backup ripristinato. Una copia dei dati precedenti è stata scaricata per sicurezza."
+          });
+        }
+      });
+    } catch (e) {
+      setDialog({
+        titolo: "Ripristino non riuscito",
+        messaggio: e.message
+      });
+    }
+  };
+
+  // Promemoria backup: avvisa se l'ultimo backup è vecchio (o non è mai stato fatto)
+  const giorniDaBackup = impostazioni.ultimoBackup ? Math.floor((new Date(oggiISO()) - new Date(impostazioni.ultimoBackup)) / 86400000) : null;
+  const backupDaFare = bollette.length > 0 && (giorniDaBackup == null || giorniDaBackup > 30);
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      minHeight: "100vh",
+      background: C.bg,
+      fontFamily: fontBody,
+      color: C.ink
+    }
+  }, /*#__PURE__*/React.createElement("style", null, `
+        * { box-sizing: border-box; }
+        button { font-family: inherit; cursor: pointer; }
+        input, select, textarea { font-family: inherit; }
+        ::placeholder { color: ${C.inkSoft}; opacity: .6; }
+        .tab-btn:focus-visible, .icon-btn:focus-visible, .pri-btn:focus-visible { outline: 2px solid ${C.ambra}; outline-offset: 2px; }
+        @media (prefers-reduced-motion: no-preference) {
+          .fade-in { animation: fadeIn .35s ease both; }
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+        .spin { animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+      `), /*#__PURE__*/React.createElement(Header, {
+    onExport: exportCSV,
+    onBackup: exportBackup,
+    onRestore: importBackup,
+    onCloud: () => setCloudModal(true),
+    cloudAttivo: !!(cfg && cfg.url),
+    sync: sync
+  }), backupDaFare && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.ambraSoft,
+      borderBottom: `1px solid #E7CE9E`
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      maxWidth: 1100,
+      margin: "0 auto",
+      padding: "10px 20px",
+      fontSize: 13,
+      color: "#6e4a10",
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      flexWrap: "wrap"
+    }
+  }, /*#__PURE__*/React.createElement(AlertTriangle, {
+    size: 15,
+    style: {
+      flexShrink: 0
+    }
+  }), /*#__PURE__*/React.createElement("span", null, giorniDaBackup == null ? "Non hai ancora fatto un backup dell'archivio." : `L'ultimo backup risale a ${giorniDaBackup} giorni fa.`, " I dati vivono solo in questo browser:"), /*#__PURE__*/React.createElement("button", {
+    onClick: exportBackup,
+    style: {
+      background: "none",
+      border: "none",
+      color: "#6e4a10",
+      fontWeight: 700,
+      textDecoration: "underline",
+      padding: 0,
+      fontSize: 13
+    }
+  }, "scarica un backup adesso"))), /*#__PURE__*/React.createElement("nav", {
+    style: {
+      maxWidth: 1100,
+      margin: "0 auto",
+      padding: "0 20px",
+      display: "flex",
+      gap: 4,
+      borderBottom: `1px solid ${C.line}`,
+      flexWrap: "wrap"
+    }
+  }, TABS.map(t => {
+    const active = tab === t.id;
+    const Icon = t.icon;
+    return /*#__PURE__*/React.createElement("button", {
+      key: t.id,
+      className: "tab-btn",
+      onClick: () => setTab(t.id),
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        padding: "14px 16px",
+        background: "none",
+        border: "none",
+        borderBottom: active ? `2px solid ${C.verde}` : "2px solid transparent",
+        color: active ? C.ink : C.inkSoft,
+        fontWeight: active ? 600 : 500,
+        fontSize: 14.5,
+        marginBottom: -1
+      }
+    }, /*#__PURE__*/React.createElement(Icon, {
+      size: 17,
+      strokeWidth: 2
+    }), t.label, t.badge > 0 && /*#__PURE__*/React.createElement("span", {
+      style: {
+        background: C.rosso,
+        color: "#fff",
+        borderRadius: 20,
+        fontSize: 11,
+        fontWeight: 700,
+        padding: "1px 7px",
+        minWidth: 18,
+        textAlign: "center"
+      }
+    }, t.badge));
+  })), /*#__PURE__*/React.createElement("main", {
+    style: {
+      maxWidth: 1100,
+      margin: "0 auto",
+      padding: "28px 20px 80px"
+    },
+    className: "fade-in",
+    key: tab
+  }, tab === "utenze" && /*#__PURE__*/React.createElement(Utenze, {
+    utenze,
+    setUtenze,
+    intestatari,
+    setIntestatari,
+    bollette,
+    setDialog
+  }), tab === "bollette" && /*#__PURE__*/React.createElement(Bollette, {
+    bollette,
+    setBollette,
+    utenze,
+    intestatari,
+    setDialog,
+    impostazioni,
+    setImpostazioni,
+    onExportICS: exportICS
+  }), tab === "consumi" && /*#__PURE__*/React.createElement(Consumi, {
+    bollette,
+    utenze,
+    intestatari
+  }), tab === "azioni" && /*#__PURE__*/React.createElement(Azioni, {
+    azioni,
+    setAzioni,
+    utenze
+  })), dialog && /*#__PURE__*/React.createElement(Modal, {
+    title: dialog.titolo,
+    onClose: () => setDialog(null)
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gap: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14,
+      lineHeight: 1.6
+    }
+  }, dialog.messaggio), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "flex-end",
+      gap: 10
+    }
+  }, dialog.onConferma ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(GhostBtn, {
+    onClick: () => setDialog(null)
+  }, "Annulla"), /*#__PURE__*/React.createElement(PrimaryBtn, {
+    onClick: () => {
+      const fn = dialog.onConferma;
+      setDialog(null);
+      fn();
+    }
+  }, dialog.etichettaConferma || "Conferma")) : /*#__PURE__*/React.createElement(PrimaryBtn, {
+    onClick: () => setDialog(null)
+  }, "Ok")))), cloudModal && /*#__PURE__*/React.createElement(CloudModal, {
+    cfg: cfg,
+    statoCorrente: {
+      intestatari,
+      utenze,
+      bollette,
+      azioni,
+      impostazioni
+    },
+    applicaStato: applicaStato,
+    sync: sync,
+    onSalvaCfg: nuovo => {
+      setCfg(nuovo);
+      saveCfg(nuovo);
+    },
+    onClose: () => setCloudModal(false)
+  }));
+}
+
+/* ============================================================
+   HEADER
+============================================================ */
+function Header({
+  onExport,
+  onBackup,
+  onRestore,
+  onCloud,
+  cloudAttivo,
+  sync
+}) {
+  const btn = {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 7,
+    background: "rgba(255,255,255,.1)",
+    color: "#F3F1EC",
+    border: "1px solid rgba(255,255,255,.25)",
+    borderRadius: 8,
+    padding: "9px 14px",
+    fontSize: 13.5,
+    fontWeight: 600
+  };
+  return /*#__PURE__*/React.createElement("header", {
+    style: {
+      background: C.verdeDk,
+      color: "#F3F1EC",
+      borderBottom: `3px solid ${C.ambra}`
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      maxWidth: 1100,
+      margin: "0 auto",
+      padding: "26px 20px 22px",
+      display: "flex",
+      alignItems: "flex-end",
+      justifyContent: "space-between",
+      flexWrap: "wrap",
+      gap: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: fontMono,
+      fontSize: 11.5,
+      letterSpacing: 2,
+      textTransform: "uppercase",
+      color: C.ambraSoft,
+      marginBottom: 6
+    }
+  }, "Registro centralizzato · Energia & Gas"), /*#__PURE__*/React.createElement("h1", {
+    style: {
+      margin: 0,
+      fontFamily: fontDisplay,
+      fontSize: 30,
+      fontWeight: 600,
+      lineHeight: 1.05
+    }
+  }, "Anagrafica utenze")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 10,
+      flexWrap: "wrap"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: fontMono,
+      fontSize: 12,
+      color: "#C9D6D1",
+      textAlign: "right",
+      lineHeight: 1.7
+    }
+  }, cloudAttivo ? sync && sync.stato === "errore" ? "Google: non raggiungibile" : sync && sync.stato === "lavoro" ? "Google: sincronizzo…" : "Google: sincronizzato" : "dati salvati in questo browser", /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: C.ambraSoft
+    }
+  }, cloudAttivo ? "archivio condiviso attivo" : "fai un backup ogni tanto")), /*#__PURE__*/React.createElement("button", {
+    className: "icon-btn",
+    onClick: onExport,
+    style: btn,
+    title: "Tabella leggibile con Excel o Numbers"
+  }, /*#__PURE__*/React.createElement(Download, {
+    size: 16
+  }), " Export CSV"), /*#__PURE__*/React.createElement("button", {
+    className: "icon-btn",
+    onClick: onBackup,
+    style: btn,
+    title: "Scarica una copia completa di tutti i dati: conservala su Drive o su una chiavetta"
+  }, /*#__PURE__*/React.createElement(FileCheck, {
+    size: 16
+  }), " Backup"), /*#__PURE__*/React.createElement("label", {
+    className: "icon-btn",
+    style: {
+      ...btn,
+      cursor: "pointer"
+    },
+    title: "Ricarica i dati da un file di backup"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "file",
+    accept: "application/json",
+    style: {
+      display: "none"
+    },
+    onChange: e => {
+      onRestore(e.target.files[0]);
+      e.target.value = "";
+    }
+  }), /*#__PURE__*/React.createElement(Upload, {
+    size: 16
+  }), " Ripristina"), /*#__PURE__*/React.createElement("button", {
+    className: "icon-btn",
+    onClick: onCloud,
+    style: cloudAttivo ? {
+      ...btn,
+      background: "rgba(255,255,255,.22)",
+      borderColor: C.ambraSoft
+    } : btn,
+    title: "Archivio condiviso su Google Fogli"
+  }, /*#__PURE__*/React.createElement(Link2, {
+    size: 16
+  }), cloudAttivo ? " Google ✓" : " Collega Google"))));
+}
+
+/* ============================================================
+   SOTTO-COMPONENTI UI
+============================================================ */
+function Pill({
+  tipo
+}) {
+  const stile = tipo === "elettrico" ? {
+    bg: C.ambraSoft,
+    col: "#8a5a12",
+    Icona: Zap,
+    label: "Elettrico"
+  } : tipo === "acqua" ? {
+    bg: "#DCEAF2",
+    col: "#1c5d7a",
+    Icona: Droplets,
+    label: "Acqua"
+  } : {
+    bg: C.gasSoft,
+    col: "#2c4f66",
+    Icona: Flame,
+    label: "Gas"
+  };
+  const {
+    bg,
+    col,
+    Icona,
+    label
+  } = stile;
+  return /*#__PURE__*/React.createElement("span", {
+    style: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 5,
+      fontSize: 11.5,
+      fontWeight: 600,
+      padding: "3px 9px",
+      borderRadius: 20,
+      background: bg,
+      color: col
+    }
+  }, /*#__PURE__*/React.createElement(Icona, {
+    size: 12
+  }), label);
+}
+function NoteBadge({
+  note
+}) {
+  if (!note) return /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: C.inkSoft,
+      opacity: .5
+    }
+  }, "—");
+  const alert = /CHIUDERE|CHIARIRE|CHIESA O SALA|\?/.test(note.toUpperCase());
+  return /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11.5,
+      fontWeight: 600,
+      padding: "2px 8px",
+      borderRadius: 6,
+      background: alert ? C.rossoSoft : "transparent",
+      color: alert ? C.rosso : C.inkSoft,
+      border: alert ? "none" : `1px solid ${C.line}`
+    }
+  }, note);
+}
+function PrimaryBtn({
+  children,
+  onClick
+}) {
+  return /*#__PURE__*/React.createElement("button", {
+    className: "pri-btn",
+    onClick: onClick,
+    style: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 7,
+      background: C.verde,
+      color: "#fff",
+      border: "none",
+      borderRadius: 8,
+      padding: "10px 16px",
+      fontSize: 14,
+      fontWeight: 600
+    }
+  }, children);
+}
+function GhostBtn({
+  children,
+  onClick
+}) {
+  return /*#__PURE__*/React.createElement("button", {
+    className: "icon-btn",
+    onClick: onClick,
+    style: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 7,
+      background: C.panel,
+      color: C.ink,
+      border: `1px solid ${C.line}`,
+      borderRadius: 8,
+      padding: "10px 14px",
+      fontSize: 14,
+      fontWeight: 500
+    }
+  }, children);
+}
+function Field({
+  label,
+  children
+}) {
+  return /*#__PURE__*/React.createElement("label", {
+    style: {
+      display: "block"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      display: "block",
+      fontSize: 12.5,
+      fontWeight: 600,
+      color: C.inkSoft,
+      marginBottom: 6
+    }
+  }, label), children);
+}
+const inputStyle = {
+  width: "100%",
+  padding: "9px 11px",
+  border: `1px solid ${C.line}`,
+  borderRadius: 8,
+  fontSize: 14,
+  background: "#fff",
+  color: C.ink
+};
+function Modal({
+  title,
+  onClose,
+  children,
+  wide,
+  maxW
+}) {
+  return /*#__PURE__*/React.createElement("div", {
+    onClick: onClose,
+    style: {
+      position: "fixed",
+      inset: 0,
+      background: "rgba(35,48,46,.45)",
+      display: "grid",
+      placeItems: "center",
+      padding: 16,
+      zIndex: 50
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    onClick: e => e.stopPropagation(),
+    className: "fade-in",
+    style: {
+      background: C.panel,
+      borderRadius: 14,
+      width: "100%",
+      maxWidth: maxW || (wide ? 640 : 480),
+      maxHeight: "90vh",
+      overflowY: "auto",
+      boxShadow: "0 20px 60px rgba(0,0,0,.25)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      padding: "18px 22px",
+      borderBottom: `1px solid ${C.line}`
+    }
+  }, /*#__PURE__*/React.createElement("h3", {
+    style: {
+      margin: 0,
+      fontFamily: fontDisplay,
+      fontSize: 19
+    }
+  }, title), /*#__PURE__*/React.createElement("button", {
+    className: "icon-btn",
+    onClick: onClose,
+    style: {
+      background: "none",
+      border: "none",
+      color: C.inkSoft,
+      padding: 4,
+      borderRadius: 6
+    }
+  }, /*#__PURE__*/React.createElement(X, {
+    size: 20
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: 22
+    }
+  }, children)));
+}
+
+/* Pannello di collegamento all'archivio su Google Fogli.
+   "Verifica" prova solo la connessione. "Carica" porta i dati dal cloud in
+   questo PC (il cloud vince). "Salva" manda i dati di questo PC nel cloud. */
+function CloudModal({
+  cfg,
+  statoCorrente,
+  applicaStato,
+  sync,
+  onSalvaCfg,
+  onClose
+}) {
+  const [url, setUrl] = useState(cfg?.url || "");
+  const [parola, setParola] = useState(cfg?.parola || "");
+  const [busy, setBusy] = useState(false);
+  const [esito, setEsito] = useState(null); // { ok, testo }
+  const cur = () => ({
+    url: url.trim(),
+    parola: parola.trim()
+  });
+  const valido = !!(url.trim() && parola.trim());
+  // traduce gli errori tecnici di rete in un messaggio comprensibile
+  const msgErr = e => {
+    const m = String(e && e.message || e);
+    if (/Failed to fetch|NetworkError|load failed/i.test(m)) return "Impossibile raggiungere l'archivio: controlla l'indirizzo (deve finire con /exec) e la connessione a Internet.";
+    return m;
+  };
+  const verifica = async () => {
+    if (!valido || busy) return;
+    setBusy(true);
+    setEsito(null);
+    try {
+      await cloudCarica(cur());
+      setEsito({
+        ok: true,
+        testo: "Connessione riuscita. Ora scegli «Carica» o «Salva» per collegare."
+      });
+    } catch (e) {
+      setEsito({
+        ok: false,
+        testo: msgErr(e)
+      });
+    }
+    setBusy(false);
+  };
+  const caricaDaCloud = async () => {
+    if (!valido || busy) return;
+    setBusy(true);
+    setEsito(null);
+    try {
+      const remoto = await cloudCarica(cur());
+      onSalvaCfg(cur());
+      if (remoto) {
+        applicaStato(remoto);
+        setEsito({
+          ok: true,
+          testo: "Dati caricati dall'archivio Google in questo computer."
+        });
+      } else {
+        setEsito({
+          ok: true,
+          testo: "L'archivio Google è vuoto: usa «Salva sull'archivio» per riempirlo con i dati di questo computer."
+        });
+      }
+    } catch (e) {
+      setEsito({
+        ok: false,
+        testo: msgErr(e)
+      });
+    }
+    setBusy(false);
+  };
+  const salvaSuCloud = async () => {
+    if (!valido || busy) return;
+    setBusy(true);
+    setEsito(null);
+    try {
+      await cloudSalva(cur(), statoCorrente);
+      onSalvaCfg(cur());
+      setEsito({
+        ok: true,
+        testo: "Dati di questo computer salvati nell'archivio Google."
+      });
+    } catch (e) {
+      setEsito({
+        ok: false,
+        testo: msgErr(e)
+      });
+    }
+    setBusy(false);
+  };
+  const scollega = () => {
+    onSalvaCfg(null);
+    setUrl("");
+    setParola("");
+    setEsito({
+      ok: true,
+      testo: "Collegamento rimosso. L'app torna a salvare solo in locale."
+    });
+  };
+  return /*#__PURE__*/React.createElement(Modal, {
+    title: "Collegamento a Google Fogli",
+    onClose: onClose,
+    wide: true
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gap: 16
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: 0,
+      fontSize: 13.5,
+      lineHeight: 1.6,
+      color: C.inkSoft
+    }
+  }, "Collega l'app a un archivio su Google Fogli per tenere i dati al sicuro e condivisi tra più computer. Indirizzo e parola segreta restano salvati solo in questo browser. Per crearli, segui le istruzioni nella cartella ", /*#__PURE__*/React.createElement("code", null, "apps-script"), "."), /*#__PURE__*/React.createElement(Field, {
+    label: "Indirizzo dell'app web (termina con /exec)"
+  }, /*#__PURE__*/React.createElement("input", {
+    style: inputStyle,
+    value: url,
+    onChange: e => setUrl(e.target.value),
+    placeholder: "https://script.google.com/macros/s/…/exec"
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "Parola segreta"
+  }, /*#__PURE__*/React.createElement("input", {
+    style: inputStyle,
+    value: parola,
+    onChange: e => setParola(e.target.value),
+    placeholder: "la parola scelta nello script"
+  })), esito && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13.5,
+      lineHeight: 1.5,
+      padding: "10px 12px",
+      borderRadius: 8,
+      background: esito.ok ? C.gasSoft : C.rossoSoft,
+      color: esito.ok ? C.verdeDk : C.rosso
+    }
+  }, esito.testo), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 10,
+      flexWrap: "wrap"
+    }
+  }, /*#__PURE__*/React.createElement(PrimaryBtn, {
+    onClick: caricaDaCloud
+  }, busy ? "Attendere…" : "Carica dall'archivio ⤓"), /*#__PURE__*/React.createElement(GhostBtn, {
+    onClick: salvaSuCloud
+  }, "Salva sull'archivio ⤒"), /*#__PURE__*/React.createElement(GhostBtn, {
+    onClick: verifica
+  }, "Verifica connessione")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      gap: 10,
+      borderTop: `1px solid ${C.line}`,
+      paddingTop: 12
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12.5,
+      color: C.inkSoft
+    }
+  }, sync && sync.msg ? sync.msg : "Non ancora collegato"), cfg && cfg.url && /*#__PURE__*/React.createElement("button", {
+    onClick: scollega,
+    style: {
+      background: "none",
+      border: "none",
+      color: C.rosso,
+      fontSize: 13,
+      fontWeight: 600,
+      textDecoration: "underline",
+      padding: 0,
+      flexShrink: 0
+    }
+  }, "Scollega"))));
+}
+
+/* ============================================================
+   TAB 1 — UTENZE
+============================================================ */
+function Utenze({
+  utenze,
+  setUtenze,
+  intestatari,
+  setIntestatari,
+  bollette,
+  setDialog
+}) {
+  const [filtroInt, setFiltroInt] = useState("tutti");
+  const [filtroTipo, setFiltroTipo] = useState("tutti");
+  const [q, setQ] = useState("");
+  const [modal, setModal] = useState(null); // {mode, data}
+  const [modalInt, setModalInt] = useState(null);
+  const filtered = utenze.filter(u => {
+    if (filtroInt !== "tutti" && u.intestatario !== filtroInt) return false;
+    if (filtroTipo !== "tutti" && u.tipo !== filtroTipo) return false;
+    if (q && !`${u.luogo} ${u.indirizzo || ""} ${u.codice} ${u.pde} ${u.note}`.toLowerCase().includes(q.toLowerCase())) return false;
+    return true;
+  });
+  const nomeInt = id => intestatari.find(i => i.id === id)?.nome ?? "—";
+  const bolletteCount = uId => bollette.filter(b => b.utenza === uId).length;
+  const delUtenza = id => setDialog({
+    titolo: "Eliminare questa utenza?",
+    messaggio: "Le bollette già registrate per questa utenza resteranno in archivio ma senza abbinamento.",
+    etichettaConferma: "Elimina",
+    onConferma: () => setUtenze(u => u.filter(x => x.id !== id))
+  });
+  const saveUtenza = data => {
+    if (data.id) setUtenze(u => u.map(x => x.id === data.id ? data : x));else setUtenze(u => [...u, {
+      ...data,
+      id: uid()
+    }]);
+    setModal(null);
+  };
+  const saveInt = data => {
+    if (data.id) setIntestatari(i => i.map(x => x.id === data.id ? data : x));else setIntestatari(i => [...i, {
+      ...data,
+      id: uid()
+    }]);
+    setModalInt(null);
+  };
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))",
+      gap: 14,
+      marginBottom: 24
+    }
+  }, intestatari.map(i => {
+    const el = utenze.filter(u => u.intestatario === i.id && u.tipo === "elettrico").length;
+    const gas = utenze.filter(u => u.intestatario === i.id && u.tipo === "gas").length;
+    const acqua = utenze.filter(u => u.intestatario === i.id && u.tipo === "acqua").length;
+    return /*#__PURE__*/React.createElement("div", {
+      key: i.id,
+      style: {
+        background: C.panel,
+        border: `1px solid ${C.line}`,
+        borderRadius: 12,
+        padding: "16px 18px"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "flex-start",
+        gap: 8
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontFamily: fontDisplay,
+        fontSize: 17,
+        fontWeight: 600,
+        lineHeight: 1.2
+      }
+    }, i.nome), /*#__PURE__*/React.createElement("button", {
+      className: "icon-btn",
+      onClick: () => setModalInt(i),
+      style: {
+        background: "none",
+        border: "none",
+        color: C.inkSoft,
+        padding: 2
+      }
+    }, /*#__PURE__*/React.createElement(Pencil, {
+      size: 15
+    }))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontFamily: fontMono,
+        fontSize: 12,
+        color: C.inkSoft,
+        marginTop: 6
+      }
+    }, "CF ", i.cf, " · Cliente ", i.codiceCliente), /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginTop: 12,
+        display: "flex",
+        gap: 16,
+        fontSize: 13
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 5,
+        color: "#8a5a12"
+      }
+    }, /*#__PURE__*/React.createElement(Zap, {
+      size: 14
+    }), " ", el, " elettriche"), /*#__PURE__*/React.createElement("span", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 5,
+        color: "#2c4f66"
+      }
+    }, /*#__PURE__*/React.createElement(Flame, {
+      size: 14
+    }), " ", gas, " gas"), acqua > 0 && /*#__PURE__*/React.createElement("span", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 5,
+        color: "#1c5d7a"
+      }
+    }, /*#__PURE__*/React.createElement(Droplets, {
+      size: 14
+    }), " ", acqua, " acqua")));
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 10,
+      alignItems: "center",
+      flexWrap: "wrap",
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "relative",
+      flex: "1 1 220px"
+    }
+  }, /*#__PURE__*/React.createElement(Search, {
+    size: 16,
+    style: {
+      position: "absolute",
+      left: 11,
+      top: 11,
+      color: C.inkSoft
+    }
+  }), /*#__PURE__*/React.createElement("input", {
+    value: q,
+    onChange: e => setQ(e.target.value),
+    placeholder: "Cerca luogo, POD/PDR, PDE…",
+    style: {
+      ...inputStyle,
+      paddingLeft: 34
+    }
+  })), /*#__PURE__*/React.createElement("select", {
+    value: filtroInt,
+    onChange: e => setFiltroInt(e.target.value),
+    style: {
+      ...inputStyle,
+      width: "auto"
+    }
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "tutti"
+  }, "Tutti gli intestatari"), intestatari.map(i => /*#__PURE__*/React.createElement("option", {
+    key: i.id,
+    value: i.id
+  }, i.nome))), /*#__PURE__*/React.createElement("select", {
+    value: filtroTipo,
+    onChange: e => setFiltroTipo(e.target.value),
+    style: {
+      ...inputStyle,
+      width: "auto"
+    }
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "tutti"
+  }, "Tutti i tipi"), /*#__PURE__*/React.createElement("option", {
+    value: "elettrico"
+  }, "Elettrico"), /*#__PURE__*/React.createElement("option", {
+    value: "gas"
+  }, "Gas"), /*#__PURE__*/React.createElement("option", {
+    value: "acqua"
+  }, "Acqua")), /*#__PURE__*/React.createElement(GhostBtn, {
+    onClick: () => setModalInt({})
+  }, /*#__PURE__*/React.createElement(Building2, {
+    size: 16
+  }), " Intestatario"), /*#__PURE__*/React.createElement(PrimaryBtn, {
+    onClick: () => setModal({})
+  }, /*#__PURE__*/React.createElement(Plus, {
+    size: 16
+  }), " Utenza")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.panel,
+      border: `1px solid ${C.line}`,
+      borderRadius: 12,
+      overflow: "hidden"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      overflowX: "auto"
+    }
+  }, /*#__PURE__*/React.createElement("table", {
+    style: {
+      width: "100%",
+      borderCollapse: "collapse",
+      fontSize: 13.5,
+      minWidth: 760
+    }
+  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", {
+    style: {
+      background: C.verdeDk,
+      color: "#E9EEEC",
+      textAlign: "left"
+    }
+  }, ["Luogo", "Tipo", "POD / PDR", "PDE", "Potenza", "Note", "Bollette", ""].map((h, k) => /*#__PURE__*/React.createElement("th", {
+    key: k,
+    style: {
+      padding: "11px 14px",
+      fontWeight: 600,
+      fontSize: 12,
+      letterSpacing: .3,
+      whiteSpace: "nowrap"
+    }
+  }, h)))), /*#__PURE__*/React.createElement("tbody", null, filtered.length === 0 && /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", {
+    colSpan: 8,
+    style: {
+      padding: 28,
+      textAlign: "center",
+      color: C.inkSoft
+    }
+  }, "Nessuna utenza trovata. Modifica i filtri o aggiungine una nuova.")), filtered.map((u, idx) => /*#__PURE__*/React.createElement("tr", {
+    key: u.id,
+    style: {
+      borderTop: `1px solid ${C.line}`,
+      background: idx % 2 ? "rgba(218,214,203,.18)" : "transparent"
+    }
+  }, /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "11px 14px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 600
+    }
+  }, u.luogo), u.indirizzo && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11.5,
+      color: C.inkSoft
+    }
+  }, u.indirizzo), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11.5,
+      color: C.inkSoft
+    }
+  }, nomeInt(u.intestatario))), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "11px 14px"
+    }
+  }, /*#__PURE__*/React.createElement(Pill, {
+    tipo: u.tipo
+  })), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "11px 14px",
+      fontFamily: fontMono,
+      fontSize: 12.5
+    }
+  }, u.codice), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "11px 14px",
+      fontFamily: fontMono
+    }
+  }, u.pde), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "11px 14px",
+      whiteSpace: "nowrap"
+    }
+  }, u.tipo === "gas" ? "—" : `${num(u.potenza)} kW`), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "11px 14px"
+    }
+  }, /*#__PURE__*/React.createElement(NoteBadge, {
+    note: u.note
+  })), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "11px 14px",
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: fontMono,
+      fontWeight: 600,
+      color: bolletteCount(u.id) ? C.verde : C.inkSoft
+    }
+  }, bolletteCount(u.id))), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "8px 10px",
+      whiteSpace: "nowrap"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "icon-btn",
+    onClick: () => setModal(u),
+    style: {
+      background: "none",
+      border: "none",
+      color: C.inkSoft,
+      padding: 5
+    }
+  }, /*#__PURE__*/React.createElement(Pencil, {
+    size: 15
+  })), /*#__PURE__*/React.createElement("button", {
+    className: "icon-btn",
+    onClick: () => delUtenza(u.id),
+    style: {
+      background: "none",
+      border: "none",
+      color: C.rosso,
+      padding: 5
+    }
+  }, /*#__PURE__*/React.createElement(Trash2, {
+    size: 15
+  }))))))))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 10,
+      fontSize: 12.5,
+      color: C.inkSoft
+    }
+  }, filtered.length, " utenze visualizzate · ", utenze.length, " totali"), modal && /*#__PURE__*/React.createElement(UtenzaModal, {
+    data: modal,
+    intestatari: intestatari,
+    onSave: saveUtenza,
+    onClose: () => setModal(null)
+  }), modalInt && /*#__PURE__*/React.createElement(IntModal, {
+    data: modalInt,
+    onSave: saveInt,
+    onClose: () => setModalInt(null)
+  }));
+}
+function UtenzaModal({
+  data,
+  intestatari,
+  onSave,
+  onClose
+}) {
+  const [f, setF] = useState({
+    id: data.id || "",
+    intestatario: data.intestatario || intestatari[0]?.id,
+    tipo: data.tipo || "elettrico",
+    luogo: data.luogo || "",
+    indirizzo: data.indirizzo || "",
+    codice: data.codice || "",
+    pde: data.pde || "",
+    potenza: data.potenza ?? "",
+    note: data.note || ""
+  });
+  const set = (k, v) => setF(s => ({
+    ...s,
+    [k]: v
+  }));
+  return /*#__PURE__*/React.createElement(Modal, {
+    title: data.id ? "Modifica utenza" : "Nuova utenza",
+    onClose: onClose
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gap: 14
+    }
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: "Intestatario"
+  }, /*#__PURE__*/React.createElement("select", {
+    value: f.intestatario,
+    onChange: e => set("intestatario", e.target.value),
+    style: inputStyle
+  }, intestatari.map(i => /*#__PURE__*/React.createElement("option", {
+    key: i.id,
+    value: i.id
+  }, i.nome)))), /*#__PURE__*/React.createElement(Field, {
+    label: "Tipo fornitura"
+  }, /*#__PURE__*/React.createElement("select", {
+    value: f.tipo,
+    onChange: e => set("tipo", e.target.value),
+    style: inputStyle
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "elettrico"
+  }, "Elettrico"), /*#__PURE__*/React.createElement("option", {
+    value: "gas"
+  }, "Gas"), /*#__PURE__*/React.createElement("option", {
+    value: "acqua"
+  }, "Acqua"))), /*#__PURE__*/React.createElement(Field, {
+    label: "Soprannome (nome a tuo piacere)"
+  }, /*#__PURE__*/React.createElement("input", {
+    value: f.luogo,
+    onChange: e => set("luogo", e.target.value),
+    style: inputStyle,
+    placeholder: "es. ex Volpi, Garage Chimenti, Cappella"
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "Indirizzo reale della fornitura"
+  }, /*#__PURE__*/React.createElement("input", {
+    value: f.indirizzo,
+    onChange: e => set("indirizzo", e.target.value),
+    style: inputStyle,
+    placeholder: "es. Via Carducci 44 (come da bolletta)"
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: f.tipo === "gas" ? "PDR (codice univoco)" : "POD (codice univoco)"
+  }, /*#__PURE__*/React.createElement("input", {
+    value: f.codice,
+    onChange: e => set("codice", e.target.value),
+    style: {
+      ...inputStyle,
+      fontFamily: fontMono
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: 12
+    }
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: "PDE"
+  }, /*#__PURE__*/React.createElement("input", {
+    value: f.pde,
+    onChange: e => set("pde", e.target.value),
+    style: {
+      ...inputStyle,
+      fontFamily: fontMono
+    }
+  })), f.tipo === "elettrico" && /*#__PURE__*/React.createElement(Field, {
+    label: "Potenza (kW)"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    step: "0.01",
+    value: f.potenza,
+    onChange: e => set("potenza", e.target.value === "" ? "" : parseFloat(e.target.value)),
+    style: inputStyle
+  }))), /*#__PURE__*/React.createElement(Field, {
+    label: "Note"
+  }, /*#__PURE__*/React.createElement("input", {
+    value: f.note,
+    onChange: e => set("note", e.target.value),
+    style: inputStyle,
+    placeholder: "es. Alta potenza, DA CHIARIRE…"
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "flex-end",
+      gap: 10,
+      marginTop: 4
+    }
+  }, /*#__PURE__*/React.createElement(GhostBtn, {
+    onClick: onClose
+  }, "Annulla"), /*#__PURE__*/React.createElement(PrimaryBtn, {
+    onClick: () => onSave({
+      ...f,
+      potenza: f.potenza === "" ? null : f.potenza
+    })
+  }, "Salva utenza"))));
+}
+function IntModal({
+  data,
+  onSave,
+  onClose
+}) {
+  const [f, setF] = useState({
+    id: data.id || "",
+    nome: data.nome || "",
+    cf: data.cf || "",
+    fornitore: data.fornitore || "",
+    codiceCliente: data.codiceCliente || "",
+    stato: data.stato || ""
+  });
+  const set = (k, v) => setF(s => ({
+    ...s,
+    [k]: v
+  }));
+  return /*#__PURE__*/React.createElement(Modal, {
+    title: data.id ? "Modifica intestatario" : "Nuovo intestatario",
+    onClose: onClose
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gap: 14
+    }
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: "Denominazione"
+  }, /*#__PURE__*/React.createElement("input", {
+    value: f.nome,
+    onChange: e => set("nome", e.target.value),
+    style: inputStyle,
+    placeholder: "es. Parrocchia di…"
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: 12
+    }
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: "Codice fiscale"
+  }, /*#__PURE__*/React.createElement("input", {
+    value: f.cf,
+    onChange: e => set("cf", e.target.value),
+    style: {
+      ...inputStyle,
+      fontFamily: fontMono
+    }
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "Codice cliente"
+  }, /*#__PURE__*/React.createElement("input", {
+    value: f.codiceCliente,
+    onChange: e => set("codiceCliente", e.target.value),
+    style: {
+      ...inputStyle,
+      fontFamily: fontMono
+    }
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: 12
+    }
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: "Fornitore"
+  }, /*#__PURE__*/React.createElement("input", {
+    value: f.fornitore,
+    onChange: e => set("fornitore", e.target.value),
+    style: inputStyle
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "Stato ricognizione"
+  }, /*#__PURE__*/React.createElement("input", {
+    value: f.stato,
+    onChange: e => set("stato", e.target.value),
+    style: inputStyle
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "flex-end",
+      gap: 10,
+      marginTop: 4
+    }
+  }, /*#__PURE__*/React.createElement(GhostBtn, {
+    onClick: onClose
+  }, "Annulla"), /*#__PURE__*/React.createElement(PrimaryBtn, {
+    onClick: () => onSave(f)
+  }, "Salva intestatario"))));
+}
+
+/* ============================================================
+   TAB 2 — BOLLETTE
+============================================================ */
+function Bollette({
+  bollette,
+  setBollette,
+  utenze,
+  intestatari,
+  setDialog,
+  impostazioni,
+  setImpostazioni,
+  onExportICS
+}) {
+  const [modal, setModal] = useState(null);
+  const [pdfModal, setPdfModal] = useState(null); // bolletta di cui mostrare il PDF
+  const [filtroU, setFiltroU] = useState("tutte");
+  const [filtroAnno, setFiltroAnno] = useState("tutti");
+  const [filtroStato, setFiltroStato] = useState("tutte"); // tutte | dapagare | scadute | pagate
+  const [soloSenzaPdf, setSoloSenzaPdf] = useState(false); // regola PDF: mostra solo quelle senza link
+  const [importBatch, setImportBatch] = useState(null); // { righe:[...], stato }
+  const [importStato, setImportStato] = useState("idle");
+
+  // anni presenti in archivio (dal periodo o, in mancanza, dalla scadenza)
+  const anni = useMemo(() => {
+    const s = new Set();
+    bollette.forEach(b => {
+      const d = b.dataInizio || b.scadenza;
+      if (d) s.add(d.slice(0, 4));
+    });
+    return [...s].sort().reverse();
+  }, [bollette]);
+  const utenzaLabel = id => {
+    const u = utenze.find(x => x.id === id);
+    return u ? `${u.luogo} · ${tipoBreve(u.tipo)} (PDE ${u.pde})` : "—";
+  };
+  const utenzaTipo = id => utenze.find(x => x.id === id)?.tipo;
+
+  // abbina un codice POD/PDR a un'utenza in archivio.
+  // normEnergia rende confrontabili anche le forme abbreviate dei POD
+  // (es. "IT1E 45092996" in tabella vs "IT001E45092996" in bolletta).
+  const abbinaUtenza = codice => {
+    if (!codice) return null;
+    return utenze.find(u => normEnergia(u.codice) === normEnergia(codice))?.id || null;
+  };
+
+  // Verifica se una bolletta è già in archivio.
+  // Criterio 1: stesso numero fattura. Criterio 2 (se manca il numero): stessa utenza + stesso periodo.
+  const isDuplicato = (riga, giaInArchivio) => {
+    const num = (riga.numero || "").trim();
+    if (num) {
+      return giaInArchivio.some(b => (b.numero || "").trim() === num) ? "numero" : null;
+    }
+    if (riga.utenza && riga.dataInizio) {
+      return giaInArchivio.some(b => b.utenza === riga.utenza && b.dataInizio === riga.dataInizio) ? "periodo" : null;
+    }
+    return null;
+  };
+
+  // Caricamento di uno o PIÙ PDF insieme. Ogni file può contenere più bollette.
+  const onCaricaPdf = async fileList => {
+    const files = Array.from(fileList || []);
+    if (!files.length) return;
+    setImportStato("leggendo");
+    try {
+      const righe = [];
+      // accumulo anche i numeri già visti in questo batch, per scovare doppioni nello stesso caricamento
+      const numeriNelBatch = [];
+      for (const file of files) {
+        const testo = await estraiTestoPdf(file);
+        const blocchi = splitBollette(testo);
+        for (const b of blocchi) {
+          const campi = parseBolletta(b);
+          if (!(campi.importo?.valore || campi.consumo?.valore || campi.codice?.valore)) continue;
+          const utenzaId = abbinaUtenza(campi.codice?.valore);
+          // VERIFICA: plausibilità dei dati letti e coerenza col tipo dell'utenza abbinata
+          const tipoU = utenze.find(u => u.id === utenzaId)?.tipo;
+          const v = validaEstrazione(campi, tipoU);
+          const avvisiRiga = [...v.avvisi];
+          if (campi._avvisoExtra) avvisiRiga.push(campi._avvisoExtra);
+          if (campi._depositoCauzionale) avvisiRiga.push("Include un deposito cauzionale una tantum.");
+          const riga = {
+            includi: true,
+            codice: campi.codice?.valore || "",
+            utenza: utenzaId,
+            dataInizio: campi.dataInizio?.valore || "",
+            dataFine: campi.dataFine?.valore || "",
+            consumo: campi.consumo?.valore || "",
+            importo: campi.importo?.valore || "",
+            scadenza: campi.scadenza?.valore || "",
+            quotaFissa: campi.quotaFissa?.valore || "",
+            numero: campi.numero?.valore || "",
+            fornitore: campi._fornitore,
+            fileNome: file.name,
+            avvisi: avvisiRiga
+          };
+          // duplicato rispetto all'archivio o ad altre righe già lette in questo batch
+          const dupArchivio = isDuplicato(riga, bollette);
+          const dupBatch = riga.numero && numeriNelBatch.includes(riga.numero.trim());
+          riga.duplicato = dupArchivio || (dupBatch ? "numero" : null);
+          if (riga.duplicato) riga.includi = false; // i duplicati partono deselezionati
+          if (riga.numero) numeriNelBatch.push(riga.numero.trim());
+          righe.push(riga);
+        }
+      }
+      setImportBatch({
+        righe,
+        nFile: files.length
+      });
+      setImportStato("rivedi");
+    } catch (e) {
+      setImportStato("errore");
+      setDialog({
+        titolo: "Lettura non riuscita",
+        messaggio: e.message
+      });
+    }
+  };
+  const confermaImport = righeFinali => {
+    const nuove = righeFinali.filter(r => r.includi).map(r => ({
+      id: uid(),
+      utenza: r.utenza,
+      dataInizio: r.dataInizio,
+      dataFine: r.dataFine,
+      consumo: r.consumo,
+      importo: r.importo,
+      scadenza: r.scadenza,
+      quotaFissa: r.quotaFissa,
+      numero: r.numero,
+      pagata: false,
+      fileNome: r.fileNome || "",
+      // link automatico: ricerca su Google Drive del nome del file caricato
+      linkDrive: linkDriveAutomatico(r.fileNome)
+    }));
+    setBollette(x => [...x, ...nuove]);
+    setImportBatch(null);
+    setImportStato("idle");
+  };
+  const filtered = bollette.filter(b => filtroU === "tutte" || b.utenza === filtroU).filter(b => filtroAnno === "tutti" || (b.dataInizio || b.scadenza || "").startsWith(filtroAnno)).filter(b => filtroStato === "tutte" || filtroStato === "pagate" && b.pagata || filtroStato === "dapagare" && !b.pagata || filtroStato === "scadute" && isScaduta(b)).filter(b => !soloSenzaPdf || !b.linkDrive).sort((a, b) => (b.dataInizio || "").localeCompare(a.dataInizio || ""));
+  const nSenzaPdf = bollette.filter(b => !b.linkDrive).length;
+  const save = b => {
+    if (b.id) setBollette(x => x.map(y => y.id === b.id ? b : y));else setBollette(x => [...x, {
+      ...b,
+      id: uid()
+    }]);
+    setModal(null);
+  };
+  const del = id => setDialog({
+    titolo: "Eliminare questa bolletta?",
+    messaggio: "L'operazione non si può annullare (a meno di avere un backup).",
+    etichettaConferma: "Elimina",
+    onConferma: () => setBollette(x => x.filter(y => y.id !== id))
+  });
+  const togglePagata = id => setBollette(x => x.map(y => y.id === id ? {
+    ...y,
+    pagata: !y.pagata
+  } : y));
+  const nScadute = bollette.filter(isScaduta).length;
+  const totImporto = filtered.reduce((s, b) => s + (parseFloat(b.importo) || 0), 0);
+  return /*#__PURE__*/React.createElement("div", null, nScadute > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.rossoSoft,
+      border: `1px solid ${C.rosso}`,
+      borderRadius: 12,
+      padding: "14px 18px",
+      marginBottom: 14,
+      fontSize: 13.5,
+      color: C.rosso,
+      display: "flex",
+      gap: 10,
+      fontWeight: 600
+    }
+  }, /*#__PURE__*/React.createElement(AlertTriangle, {
+    size: 18,
+    style: {
+      flexShrink: 0,
+      marginTop: 1
+    }
+  }), /*#__PURE__*/React.createElement("span", null, nScadute === 1 ? "C'è 1 bolletta scaduta e non pagata." : `Ci sono ${nScadute} bollette scadute e non pagate.`, " Quando la paghi, clicca sull'etichetta rossa nella colonna Scadenza per segnarla come pagata.")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.ambraSoft,
+      border: `1px solid #E7CE9E`,
+      borderRadius: 12,
+      padding: "14px 18px",
+      marginBottom: 20,
+      fontSize: 13.5,
+      color: "#6e4a10",
+      display: "flex",
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement(FileText, {
+    size: 18,
+    style: {
+      flexShrink: 0,
+      marginTop: 1
+    }
+  }), /*#__PURE__*/React.createElement("span", null, "Carica anche ", /*#__PURE__*/React.createElement("strong", null, "più PDF in una volta"), " (selezionali tutti insieme): l'app legge ogni file, riconosce i file con più bollette dentro, segnala i ", /*#__PURE__*/React.createElement("strong", null, "duplicati già in archivio"), " e ti fa verificare tutto prima di salvare. Se conservi gli stessi file nella tua cartella su Google Drive, il ", /*#__PURE__*/React.createElement("strong", null, "link al PDF"), " viene creato da solo (colonna PDF).")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 10,
+      alignItems: "center",
+      flexWrap: "wrap",
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("select", {
+    value: filtroU,
+    onChange: e => setFiltroU(e.target.value),
+    style: {
+      ...inputStyle,
+      width: "auto",
+      flex: "1 1 180px",
+      maxWidth: 300
+    }
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "tutte"
+  }, "Tutte le utenze"), utenze.map(u => /*#__PURE__*/React.createElement("option", {
+    key: u.id,
+    value: u.id
+  }, utenzaLabel(u.id)))), /*#__PURE__*/React.createElement("select", {
+    value: filtroAnno,
+    onChange: e => setFiltroAnno(e.target.value),
+    style: {
+      ...inputStyle,
+      width: "auto"
+    },
+    title: "Filtra per anno"
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "tutti"
+  }, "Tutti gli anni"), anni.map(a => /*#__PURE__*/React.createElement("option", {
+    key: a,
+    value: a
+  }, a))), /*#__PURE__*/React.createElement("select", {
+    value: filtroStato,
+    onChange: e => setFiltroStato(e.target.value),
+    style: {
+      ...inputStyle,
+      width: "auto"
+    },
+    title: "Filtra per stato pagamento"
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "tutte"
+  }, "Tutti gli stati"), /*#__PURE__*/React.createElement("option", {
+    value: "dapagare"
+  }, "Da pagare"), /*#__PURE__*/React.createElement("option", {
+    value: "scadute"
+  }, "Scadute"), /*#__PURE__*/React.createElement("option", {
+    value: "pagate"
+  }, "Pagate")), nSenzaPdf > 0 && /*#__PURE__*/React.createElement("button", {
+    className: "icon-btn",
+    onClick: () => setSoloSenzaPdf(v => !v),
+    title: "Mostra solo le bollette senza PDF collegato",
+    style: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 7,
+      background: soloSenzaPdf ? C.rosso : C.rossoSoft,
+      color: soloSenzaPdf ? "#fff" : C.rosso,
+      border: `1px solid ${C.rosso}`,
+      borderRadius: 8,
+      padding: "10px 14px",
+      fontSize: 13.5,
+      fontWeight: 600
+    }
+  }, /*#__PURE__*/React.createElement(AlertTriangle, {
+    size: 15
+  }), ` Senza PDF (${nSenzaPdf})`), /*#__PURE__*/React.createElement("button", {
+    className: "icon-btn",
+    onClick: onExportICS,
+    title: "Scarica le scadenze delle bollette non pagate in un file da aprire con Calendario o Google Calendar",
+    style: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 7,
+      background: C.panel,
+      border: `1px solid ${C.line}`,
+      borderRadius: 8,
+      padding: "10px 14px",
+      fontSize: 13.5,
+      fontWeight: 600,
+      color: C.ink
+    }
+  }, /*#__PURE__*/React.createElement(Calendar, {
+    size: 15
+  }), " Scadenze → Calendario"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginLeft: "auto",
+      fontSize: 13.5,
+      color: C.inkSoft
+    }
+  }, "Totale visualizzato: ", /*#__PURE__*/React.createElement("strong", {
+    style: {
+      color: C.ink,
+      fontFamily: fontMono
+    }
+  }, eur(totImporto))), /*#__PURE__*/React.createElement("label", {
+    className: "pri-btn",
+    style: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 7,
+      background: C.verdeDk,
+      color: "#fff",
+      borderRadius: 8,
+      padding: "10px 16px",
+      fontSize: 14,
+      fontWeight: 600,
+      cursor: "pointer"
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "file",
+    accept: "application/pdf",
+    multiple: true,
+    style: {
+      display: "none"
+    },
+    onChange: e => onCaricaPdf(e.target.files)
+  }), importStato === "leggendo" ? /*#__PURE__*/React.createElement(Loader2, {
+    size: 16,
+    className: "spin"
+  }) : /*#__PURE__*/React.createElement(Upload, {
+    size: 16
+  }), " Carica PDF"), /*#__PURE__*/React.createElement(PrimaryBtn, {
+    onClick: () => setModal({})
+  }, /*#__PURE__*/React.createElement(Plus, {
+    size: 16
+  }), " Bolletta")), filtered.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.panel,
+      border: `1px dashed ${C.line}`,
+      borderRadius: 12,
+      padding: 40,
+      textAlign: "center",
+      color: C.inkSoft
+    }
+  }, /*#__PURE__*/React.createElement(FileText, {
+    size: 32,
+    style: {
+      opacity: .4
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 10,
+      fontSize: 15
+    }
+  }, "Nessuna bolletta registrata."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      marginTop: 4
+    }
+  }, "Inizia caricando lo storico: una bolletta per riga.")) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.panel,
+      border: `1px solid ${C.line}`,
+      borderRadius: 12,
+      overflow: "hidden"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      overflowX: "auto"
+    }
+  }, /*#__PURE__*/React.createElement("table", {
+    style: {
+      width: "100%",
+      borderCollapse: "collapse",
+      fontSize: 13.5,
+      minWidth: 800
+    }
+  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", {
+    style: {
+      background: C.verdeDk,
+      color: "#E9EEEC",
+      textAlign: "left"
+    }
+  }, ["Utenza", "Periodo", "Consumo", "Importo", "Scadenza", "Fattura n°", "PDF", ""].map((h, k) => /*#__PURE__*/React.createElement("th", {
+    key: k,
+    style: {
+      padding: "11px 14px",
+      fontWeight: 600,
+      fontSize: 12,
+      whiteSpace: "nowrap"
+    }
+  }, h)))), /*#__PURE__*/React.createElement("tbody", null, filtered.map((b, idx) => /*#__PURE__*/React.createElement("tr", {
+    key: b.id,
+    style: {
+      borderTop: `1px solid ${C.line}`,
+      background: idx % 2 ? "rgba(218,214,203,.18)" : "transparent"
+    }
+  }, /*#__PURE__*/React.createElement("td", {
+    onClick: () => setPdfModal(b),
+    title: "Vedi il PDF collegato",
+    style: {
+      padding: "11px 14px",
+      fontWeight: 600,
+      cursor: "pointer",
+      color: C.verdeDk
+    }
+  }, utenzaLabel(b.utenza)), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "11px 14px",
+      whiteSpace: "nowrap"
+    }
+  }, b.dataInizio || "?", " → ", b.dataFine || "?"), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "11px 14px",
+      fontFamily: fontMono,
+      whiteSpace: "nowrap"
+    }
+  }, num(parseFloat(b.consumo)), " ", unitaDi(utenzaTipo(b.utenza))), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "11px 14px",
+      fontFamily: fontMono,
+      fontWeight: 600
+    }
+  }, eur(parseFloat(b.importo))), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "11px 14px",
+      whiteSpace: "nowrap"
+    }
+  }, /*#__PURE__*/React.createElement(StatoPagamento, {
+    b: b,
+    onToggle: () => togglePagata(b.id)
+  })), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "11px 14px",
+      fontFamily: fontMono,
+      fontSize: 12.5,
+      color: C.inkSoft
+    }
+  }, b.numero || "—"), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "11px 14px",
+      textAlign: "center"
+    }
+  }, b.linkDrive ? /*#__PURE__*/React.createElement("button", {
+    className: "icon-btn",
+    onClick: () => setPdfModal(b),
+    title: "Vedi il PDF collegato",
+    style: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 5,
+      background: "none",
+      border: `1px solid ${C.line}`,
+      borderRadius: 6,
+      padding: "4px 9px",
+      color: C.gasBlue,
+      fontSize: 12.5,
+      fontWeight: 600
+    }
+  }, /*#__PURE__*/React.createElement(FileText, {
+    size: 14
+  }), "Vedi") : /*#__PURE__*/React.createElement("button", {
+    className: "icon-btn",
+    onClick: () => setModal(b),
+    title: "Manca il PDF: clicca per aggiungerlo",
+    style: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 5,
+      background: C.rossoSoft,
+      border: `1px solid ${C.rosso}`,
+      borderRadius: 6,
+      padding: "4px 9px",
+      color: C.rosso,
+      fontSize: 12,
+      fontWeight: 700
+    }
+  }, /*#__PURE__*/React.createElement(AlertTriangle, {
+    size: 13
+  }), "manca")), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "8px 10px",
+      whiteSpace: "nowrap"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "icon-btn",
+    onClick: () => setModal(b),
+    style: {
+      background: "none",
+      border: "none",
+      color: C.inkSoft,
+      padding: 5
+    }
+  }, /*#__PURE__*/React.createElement(Pencil, {
+    size: 15
+  })), /*#__PURE__*/React.createElement("button", {
+    className: "icon-btn",
+    onClick: () => del(b.id),
+    style: {
+      background: "none",
+      border: "none",
+      color: C.rosso,
+      padding: 5
+    }
+  }, /*#__PURE__*/React.createElement(Trash2, {
+    size: 15
+  }))))))))), modal && /*#__PURE__*/React.createElement(BollettaModal, {
+    data: modal,
+    utenze: utenze,
+    onSave: save,
+    onClose: () => setModal(null)
+  }), importBatch && /*#__PURE__*/React.createElement(ImportModal, {
+    batch: importBatch,
+    utenze: utenze,
+    onConfirm: confermaImport,
+    onClose: () => {
+      setImportBatch(null);
+      setImportStato("idle");
+    }
+  }), pdfModal && /*#__PURE__*/React.createElement(PdfModal, {
+    bolletta: pdfModal,
+    etichetta: utenzaLabel(pdfModal.utenza),
+    onClose: () => setPdfModal(null),
+    onEdit: () => {
+      setModal(pdfModal);
+      setPdfModal(null);
+    }
+  }));
+}
+
+// Mappa il risultato dell'estrattore {campo:{valore,conf}} nei campi del form,
+// abbinando automaticamente l'utenza giusta tramite il codice POD/PDR.
+function applicaEstrazione(campi, utenze, setF, setConf) {
+  const conf = {};
+  const patch = {};
+  ["dataInizio", "dataFine", "consumo", "importo", "numero", "scadenza", "quotaFissa"].forEach(k => {
+    if (campi[k] && campi[k].valore !== "") {
+      patch[k] = campi[k].valore;
+      conf[k] = campi[k].conf;
+    }
+  });
+  // abbina utenza dal codice
+  if (campi.codice?.valore) {
+    const match = utenze.find(u => normEnergia(u.codice) === normEnergia(campi.codice.valore));
+    if (match) {
+      patch.utenza = match.id;
+      conf.utenza = campi.codice.conf;
+    } else conf.codiceNonAbbinato = campi.codice.valore;
+  }
+  setF(s => ({
+    ...s,
+    ...patch
+  }));
+  setConf(conf);
+}
+
+// pallino di confidenza accanto al label
+/* Etichetta cliccabile dello stato pagamento.
+   Verde = pagata · Rosso = scaduta e non pagata · Ambra = in attesa.
+   Un clic alterna pagata/non pagata. */
+function StatoPagamento({
+  b,
+  onToggle
+}) {
+  const scad = isScaduta(b);
+  const fmtData = b.scadenza ? new Date(b.scadenza).toLocaleDateString("it-IT", {
+    day: "2-digit",
+    month: "short"
+  }) : null;
+  const stile = b.pagata ? {
+    background: "rgba(62,107,94,.12)",
+    color: C.verde
+  } : scad ? {
+    background: C.rosso,
+    color: "#fff"
+  } : {
+    background: C.ambraSoft,
+    color: "#8a5a12"
+  };
+  const testo = b.pagata ? "Pagata" : scad ? `Scaduta ${fmtData || ""}` : fmtData ? `Entro ${fmtData}` : "Da pagare";
+  return /*#__PURE__*/React.createElement("button", {
+    className: "icon-btn",
+    onClick: onToggle,
+    title: b.pagata ? "Clicca per segnarla come NON pagata" : "Clicca per segnarla come pagata",
+    style: {
+      ...stile,
+      border: "none",
+      borderRadius: 20,
+      padding: "3px 10px",
+      fontSize: 11.5,
+      fontWeight: 700,
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 5
+    }
+  }, b.pagata ? /*#__PURE__*/React.createElement(CheckCircle2, {
+    size: 12
+  }) : scad ? /*#__PURE__*/React.createElement(AlertTriangle, {
+    size: 12
+  }) : /*#__PURE__*/React.createElement(Calendar, {
+    size: 12
+  }), testo);
+}
+function ConfDot({
+  conf
+}) {
+  if (!conf) return null;
+  const map = {
+    ok: {
+      c: C.verde,
+      t: "letto dal PDF"
+    },
+    ai: {
+      c: C.gasBlue,
+      t: "letto con AI"
+    },
+    incerto: {
+      c: C.ambra,
+      t: "incerto, verifica"
+    }
+  };
+  const m = map[conf];
+  if (!m) return null;
+  return /*#__PURE__*/React.createElement("span", {
+    title: m.t,
+    style: {
+      display: "inline-block",
+      width: 8,
+      height: 8,
+      borderRadius: 8,
+      background: m.c,
+      marginLeft: 6,
+      verticalAlign: "middle"
+    }
+  });
+}
+function BollettaModal({
+  data,
+  utenze,
+  onSave,
+  onClose
+}) {
+  const [f, setF] = useState({
+    id: data.id || "",
+    utenza: data.utenza || utenze[0]?.id,
+    numero: data.numero || "",
+    dataInizio: data.dataInizio || "",
+    dataFine: data.dataFine || "",
+    consumo: data.consumo ?? "",
+    importo: data.importo ?? "",
+    quotaFissa: data.quotaFissa ?? "",
+    scadenza: data.scadenza || "",
+    pagata: data.pagata || false,
+    linkDrive: data.linkDrive || "",
+    fileNome: data.fileNome || ""
+  });
+  const [conf, setConf] = useState({}); // confidenza per campo dopo estrazione
+  const [stato, setStato] = useState("idle"); // idle | leggendo | letto | errore | ai
+  const [avvisi, setAvvisi] = useState([]);
+  const [codiceNonAbbinato, setCodiceNonAbbinato] = useState("");
+  const [fileCorrente, setFileCorrente] = useState(null);
+  const [esitoParser, setEsitoParser] = useState(null); // {leggibile}
+  const [fornitore, setFornitore] = useState("");
+  const set = (k, v) => {
+    setF(s => ({
+      ...s,
+      [k]: v
+    }));
+    setConf(c => ({
+      ...c,
+      [k]: undefined
+    }));
+  };
+  const tipo = utenze.find(u => u.id === f.utenza)?.tipo;
+
+  // Stadio 1+2: lettura locale
+  const onFile = async file => {
+    if (!file) return;
+    setFileCorrente(file);
+    set("fileNome", file.name);
+    // link automatico al PDF su Drive (solo se non già impostato a mano)
+    setF(s => s.linkDrive ? s : {
+      ...s,
+      linkDrive: linkDriveAutomatico(file.name)
+    });
+    setStato("leggendo");
+    setAvvisi([]);
+    setCodiceNonAbbinato("");
+    try {
+      const testo = await estraiTestoPdf(file);
+      const campi = parseBolletta(testo);
+      // verifica anche la coerenza col tipo dell'utenza che verrà abbinata
+      const matchU = campi.codice?.valore ? utenze.find(u => normEnergia(u.codice) === normEnergia(campi.codice.valore)) : null;
+      const v = validaEstrazione(campi, matchU?.tipo);
+      applicaEstrazione(campi, utenze, setF, c => {
+        setConf(c);
+        if (c.codiceNonAbbinato) setCodiceNonAbbinato(c.codiceNonAbbinato);
+      });
+      const extra = [...v.avvisi];
+      if (campi._depositoCauzionale) extra.push("Questa bolletta include un deposito cauzionale una tantum: l'importo non riflette il solo consumo del periodo.");
+      if (campi._avvisoExtra) extra.push(campi._avvisoExtra);
+      setAvvisi(extra);
+      setFornitore(campi._fornitore || "sconosciuto");
+      setEsitoParser({
+        leggibile: campi._fornitore !== "sconosciuto" && v.leggibile,
+        mancanti: v.mancanti
+      });
+      setStato("letto");
+    } catch (e) {
+      setStato("errore");
+      setAvvisi(["Lettura locale non riuscita: " + e.message + ". Puoi provare con l'AI o inserire a mano."]);
+    }
+  };
+
+  // Stadio 3: ripiego AI (solo su click)
+  const onAI = async () => {
+    if (!fileCorrente) return;
+    setStato("ai-corso");
+    try {
+      const campi = await leggiConAI(fileCorrente);
+      const v = validaEstrazione(campi);
+      applicaEstrazione(campi, utenze, setF, c => {
+        setConf(c);
+        if (c.codiceNonAbbinato) setCodiceNonAbbinato(c.codiceNonAbbinato);
+      });
+      setAvvisi(v.avvisi);
+      setStato("ai");
+    } catch (e) {
+      setStato("errore");
+      setAvvisi(["Lettura AI non riuscita: " + e.message]);
+    }
+  };
+  const labelConf = k => /*#__PURE__*/React.createElement(ConfDot, {
+    conf: conf[k]
+  });
+  return /*#__PURE__*/React.createElement(Modal, {
+    title: data.id ? "Modifica bolletta" : "Nuova bolletta",
+    onClose: onClose,
+    wide: true
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gap: 14
+    }
+  }, !data.id && /*#__PURE__*/React.createElement("div", {
+    style: {
+      border: `1px dashed ${C.verde}`,
+      borderRadius: 10,
+      background: "rgba(62,107,94,.05)",
+      padding: 16
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 12,
+      cursor: "pointer"
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "file",
+    accept: "application/pdf",
+    style: {
+      display: "none"
+    },
+    onChange: e => onFile(e.target.files[0])
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      width: 42,
+      height: 42,
+      borderRadius: 10,
+      background: C.verde,
+      color: "#fff",
+      flexShrink: 0
+    }
+  }, stato === "leggendo" ? /*#__PURE__*/React.createElement(Loader2, {
+    size: 20,
+    className: "spin"
+  }) : /*#__PURE__*/React.createElement(Upload, {
+    size: 20
+  })), /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 600,
+      fontSize: 14.5,
+      display: "block"
+    }
+  }, stato === "leggendo" ? "Lettura del PDF in corso…" : "Carica il PDF della bolletta"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12.5,
+      color: C.inkSoft
+    }
+  }, "Lettura locale gratuita. I campi si compilano da soli, poi verifichi tu."))), stato === "letto" && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 12,
+      paddingTop: 12,
+      borderTop: `1px solid ${C.line}`,
+      fontSize: 13
+    }
+  }, fornitore && fornitore !== "sconosciuto" && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: C.inkSoft,
+      marginBottom: 8
+    }
+  }, "Fornitore riconosciuto: ", /*#__PURE__*/React.createElement("strong", {
+    style: {
+      color: C.ink,
+      textTransform: "capitalize"
+    }
+  }, fornitore)), esitoParser?.leggibile ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 7,
+      color: C.verde,
+      fontWeight: 600
+    }
+  }, /*#__PURE__*/React.createElement(FileCheck, {
+    size: 16
+  }), " Dati estratti. Controlla i campi col pallino colorato e correggi se serve.") : /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 10,
+      flexWrap: "wrap"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 7,
+      color: C.ambra,
+      fontWeight: 600
+    }
+  }, /*#__PURE__*/React.createElement(AlertTriangle, {
+    size: 16
+  }), " ", fornitore === "sconosciuto" ? "Fornitore non riconosciuto: leggi con AI o inserisci a mano." : "Lettura locale incompleta: alcuni campi mancano."), /*#__PURE__*/React.createElement("button", {
+    onClick: onAI,
+    style: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 6,
+      background: C.gasBlue,
+      color: "#fff",
+      border: "none",
+      borderRadius: 8,
+      padding: "8px 13px",
+      fontSize: 13,
+      fontWeight: 600
+    }
+  }, /*#__PURE__*/React.createElement(Sparkles, {
+    size: 15
+  }), " Leggi con AI"))), stato === "ai-corso" && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 12,
+      paddingTop: 12,
+      borderTop: `1px solid ${C.line}`,
+      fontSize: 13,
+      display: "flex",
+      alignItems: "center",
+      gap: 7,
+      color: C.gasBlue,
+      fontWeight: 600
+    }
+  }, /*#__PURE__*/React.createElement(Loader2, {
+    size: 16,
+    className: "spin"
+  }), " Lettura con AI in corso…"), stato === "ai" && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 12,
+      paddingTop: 12,
+      borderTop: `1px solid ${C.line}`,
+      fontSize: 13,
+      display: "flex",
+      alignItems: "center",
+      gap: 7,
+      color: C.gasBlue,
+      fontWeight: 600
+    }
+  }, /*#__PURE__*/React.createElement(Sparkles, {
+    size: 16
+  }), " Letto con AI. Verifica comunque i valori prima di salvare."), stato === "errore" && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 12,
+      paddingTop: 12,
+      borderTop: `1px solid ${C.line}`
+    }
+  }, fileCorrente && /*#__PURE__*/React.createElement("button", {
+    onClick: onAI,
+    style: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 6,
+      background: C.gasBlue,
+      color: "#fff",
+      border: "none",
+      borderRadius: 8,
+      padding: "8px 13px",
+      fontSize: 13,
+      fontWeight: 600
+    }
+  }, /*#__PURE__*/React.createElement(Sparkles, {
+    size: 15
+  }), " Prova con AI"))), avvisi.length > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.rossoSoft,
+      borderRadius: 8,
+      padding: "10px 14px",
+      fontSize: 13,
+      color: "#7a2f1c"
+    }
+  }, avvisi.map((a, k) => /*#__PURE__*/React.createElement("div", {
+    key: k,
+    style: {
+      display: "flex",
+      gap: 7
+    }
+  }, /*#__PURE__*/React.createElement(AlertTriangle, {
+    size: 15,
+    style: {
+      flexShrink: 0,
+      marginTop: 2
+    }
+  }), " ", a))), codiceNonAbbinato && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.ambraSoft,
+      borderRadius: 8,
+      padding: "10px 14px",
+      fontSize: 13,
+      color: "#6e4a10",
+      display: "flex",
+      gap: 7
+    }
+  }, /*#__PURE__*/React.createElement(HelpCircle, {
+    size: 15,
+    style: {
+      flexShrink: 0,
+      marginTop: 2
+    }
+  }), "Ho letto il codice ", /*#__PURE__*/React.createElement("strong", {
+    style: {
+      fontFamily: fontMono
+    }
+  }, codiceNonAbbinato), " ma non corrisponde a nessuna utenza in archivio. Seleziona l'utenza giusta a mano."), /*#__PURE__*/React.createElement(Field, {
+    label: /*#__PURE__*/React.createElement("span", null, "Utenza ", labelConf("utenza"))
+  }, /*#__PURE__*/React.createElement("select", {
+    value: f.utenza,
+    onChange: e => set("utenza", e.target.value),
+    style: {
+      ...inputStyle,
+      ...(conf.utenza ? {
+        borderColor: C.verde
+      } : {})
+    }
+  }, utenze.map(u => /*#__PURE__*/React.createElement("option", {
+    key: u.id,
+    value: u.id
+  }, u.luogo, " · ", tipoBreve(u.tipo), " (PDE ", u.pde, ")")))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: 12
+    }
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: /*#__PURE__*/React.createElement("span", null, "Periodo dal ", labelConf("dataInizio"))
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "date",
+    value: f.dataInizio,
+    onChange: e => set("dataInizio", e.target.value),
+    style: inputStyle
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: /*#__PURE__*/React.createElement("span", null, "Periodo al ", labelConf("dataFine"))
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "date",
+    value: f.dataFine,
+    onChange: e => set("dataFine", e.target.value),
+    style: inputStyle
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: 12
+    }
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: /*#__PURE__*/React.createElement("span", null, "Consumo (", unitaDi(tipo), ") ", labelConf("consumo"))
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    step: "0.01",
+    value: f.consumo,
+    onChange: e => set("consumo", e.target.value),
+    style: inputStyle
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: /*#__PURE__*/React.createElement("span", null, "Importo totale (€) ", labelConf("importo"))
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    step: "0.01",
+    value: f.importo,
+    onChange: e => set("importo", e.target.value),
+    style: inputStyle
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: 12
+    }
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: "di cui quota fissa (€)"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    step: "0.01",
+    value: f.quotaFissa,
+    onChange: e => set("quotaFissa", e.target.value),
+    style: inputStyle,
+    placeholder: "opzionale"
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: /*#__PURE__*/React.createElement("span", null, "N° fattura ", labelConf("numero"))
+  }, /*#__PURE__*/React.createElement("input", {
+    value: f.numero,
+    onChange: e => set("numero", e.target.value),
+    style: {
+      ...inputStyle,
+      fontFamily: fontMono
+    },
+    placeholder: "opzionale"
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr auto",
+      gap: 12,
+      alignItems: "end"
+    }
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: "Scadenza pagamento"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "date",
+    value: f.scadenza,
+    onChange: e => set("scadenza", e.target.value),
+    style: inputStyle
+  })), /*#__PURE__*/React.createElement("label", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      padding: "9px 0",
+      fontSize: 14,
+      fontWeight: 500
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "checkbox",
+    checked: f.pagata,
+    onChange: e => set("pagata", e.target.checked),
+    style: {
+      width: 17,
+      height: 17
+    }
+  }), " Pagata")), /*#__PURE__*/React.createElement(Field, {
+    label: /*#__PURE__*/React.createElement("span", {
+      style: {
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6
+      }
+    }, /*#__PURE__*/React.createElement(Link2, {
+      size: 14
+    }), " Link al PDF su Google Drive")
+  }, /*#__PURE__*/React.createElement("input", {
+    value: f.linkDrive,
+    onChange: e => set("linkDrive", e.target.value),
+    style: inputStyle,
+    placeholder: "incolla qui il link al file archiviato su Drive"
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12.5,
+      lineHeight: 1.5,
+      marginTop: -6,
+      color: f.linkDrive ? isLinkRicerca(f.linkDrive) ? "#6e4a10" : C.verde : C.rosso
+    }
+  }, !f.linkDrive ? "⚠ Senza link al PDF la bolletta resterà segnalata «manca PDF». Su Drive: tasto destro sul file → Condividi → Copia link, poi incollalo qui." : isLinkRicerca(f.linkDrive) ? "Link di ricerca per nome: si apre su Drive ma non mostra l'anteprima. Per l'anteprima incolla il link diretto al file." : "✓ Link diretto al file: l'anteprima sarà disponibile cliccando la bolletta."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "flex-end",
+      gap: 10,
+      marginTop: 4
+    }
+  }, /*#__PURE__*/React.createElement(GhostBtn, {
+    onClick: onClose
+  }, "Annulla"), /*#__PURE__*/React.createElement(PrimaryBtn, {
+    onClick: () => onSave(f)
+  }, "Salva bolletta"))));
+}
+
+/* Anteprima del PDF collegato. Se il link è diretto al file lo mostra in un
+   riquadro; se è una ricerca per nome (o manca) spiega cosa fare. */
+function PdfModal({
+  bolletta,
+  etichetta,
+  onClose,
+  onEdit
+}) {
+  const link = bolletta.linkDrive || "";
+  const preview = drivePreviewUrl(link);
+  const ricerca = isLinkRicerca(link);
+  const sottotitolo = `${bolletta.dataInizio || "?"} → ${bolletta.dataFine || "?"} · ${eur(parseFloat(bolletta.importo))}`;
+  return /*#__PURE__*/React.createElement(Modal, {
+    title: etichetta || "PDF della bolletta",
+    onClose: onClose,
+    maxW: 920
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gap: 14
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: C.inkSoft,
+      fontFamily: fontMono
+    }
+  }, sottotitolo), preview ? /*#__PURE__*/React.createElement("iframe", {
+    src: preview,
+    title: "Anteprima PDF",
+    style: {
+      width: "100%",
+      height: "62vh",
+      border: `1px solid ${C.line}`,
+      borderRadius: 8,
+      background: "#fff"
+    }
+  }) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "20px",
+      borderRadius: 10,
+      background: ricerca ? C.gasSoft : C.rossoSoft,
+      color: ricerca ? C.verdeDk : C.rosso,
+      fontSize: 13.5,
+      lineHeight: 1.6
+    }
+  }, ricerca ? "Questa bolletta ha solo una ricerca per nome su Drive, non il file esatto: l'anteprima non è disponibile. Apri la ricerca qui sotto, oppure modifica la bolletta e incolla il link diretto al file (su Drive: tasto destro sul file → Condividi → Copia link)." : "Nessun PDF collegato a questa bolletta. Modifica la bolletta e incolla il link diretto al file su Drive per vederlo qui."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "flex-end",
+      gap: 10,
+      flexWrap: "wrap"
+    }
+  }, link && /*#__PURE__*/React.createElement("a", {
+    href: link,
+    target: "_blank",
+    rel: "noopener noreferrer",
+    style: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 7,
+      textDecoration: "none",
+      background: C.panel,
+      color: C.ink,
+      border: `1px solid ${C.line}`,
+      borderRadius: 8,
+      padding: "10px 14px",
+      fontSize: 14,
+      fontWeight: 500
+    }
+  }, /*#__PURE__*/React.createElement(Link2, {
+    size: 16
+  }), ricerca ? " Cerca su Drive" : " Apri in Drive"), /*#__PURE__*/React.createElement(PrimaryBtn, {
+    onClick: onEdit
+  }, /*#__PURE__*/React.createElement(Pencil, {
+    size: 15
+  }), " Modifica bolletta"))));
+}
+
+/* Modal di revisione import multiplo: mostra tutte le bollette lette dal PDF,
+   con abbinamento utenza modificabile, e le importa in blocco dopo conferma. */
+function ImportModal({
+  batch,
+  utenze,
+  onConfirm,
+  onClose
+}) {
+  const [righe, setRighe] = useState(batch.righe);
+  const setRiga = (i, patch) => setRighe(rs => rs.map((r, k) => k === i ? {
+    ...r,
+    ...patch
+  } : r));
+  const nUtili = righe.filter(r => r.includi).length;
+  const nNonAbbinate = righe.filter(r => r.includi && !r.utenza).length;
+  const nDuplicati = righe.filter(r => r.duplicato).length;
+  const totImporto = righe.filter(r => r.includi).reduce((s, r) => s + (parseFloat(r.importo) || 0), 0);
+  const fornitore = righe[0]?.fornitore;
+  const nFile = batch.nFile || 1;
+  return /*#__PURE__*/React.createElement(Modal, {
+    title: `${righe.length} bollette lette da ${nFile} file`,
+    onClose: onClose,
+    wide: true
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gap: 14
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: C.inkSoft
+    }
+  }, "Controlla i dati e l'abbinamento all'utenza, poi conferma. Togli la spunta alle righe che non vuoi importare."), nDuplicati > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.rossoSoft,
+      borderRadius: 8,
+      padding: "10px 14px",
+      fontSize: 13,
+      color: "#7a2f1c",
+      display: "flex",
+      gap: 7
+    }
+  }, /*#__PURE__*/React.createElement(AlertTriangle, {
+    size: 15,
+    style: {
+      flexShrink: 0,
+      marginTop: 2
+    }
+  }), nDuplicati === 1 ? "1 bolletta risulta già in archivio ed è stata deselezionata" : `${nDuplicati} bollette risultano già in archivio e sono state deselezionate`, ". Se vuoi importarle comunque, rimetti la spunta."), nNonAbbinate > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.ambraSoft,
+      borderRadius: 8,
+      padding: "10px 14px",
+      fontSize: 13,
+      color: "#6e4a10",
+      display: "flex",
+      gap: 7
+    }
+  }, /*#__PURE__*/React.createElement(HelpCircle, {
+    size: 15,
+    style: {
+      flexShrink: 0,
+      marginTop: 2
+    }
+  }), nNonAbbinate, " ", nNonAbbinate === 1 ? "bolletta non è abbinata" : "bollette non sono abbinate", " a un'utenza: il codice POD/PDR non è in archivio. Scegli l'utenza a mano dal menù, oppure deseleziona la riga."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gap: 8,
+      maxHeight: "50vh",
+      overflowY: "auto"
+    }
+  }, righe.map((r, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    style: {
+      border: `1px solid ${r.duplicato ? C.rosso : r.utenza ? C.line : "#E2C9A3"}`,
+      borderRadius: 9,
+      padding: "10px 12px",
+      opacity: r.includi ? 1 : .5,
+      background: r.includi ? C.panel : "transparent"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "checkbox",
+    checked: r.includi,
+    onChange: e => setRiga(i, {
+      includi: e.target.checked
+    }),
+    style: {
+      width: 16,
+      height: 16,
+      flexShrink: 0
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      minWidth: 0
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 10,
+      flexWrap: "wrap",
+      alignItems: "center",
+      fontSize: 12.5,
+      color: C.inkSoft,
+      fontFamily: fontMono
+    }
+  }, /*#__PURE__*/React.createElement("span", null, r.codice || "POD/PDR ?"), /*#__PURE__*/React.createElement("span", null, r.dataInizio || "?", "→", r.dataFine || "?"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 700,
+      color: C.ink
+    }
+  }, num(parseFloat(r.consumo))), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 700,
+      color: C.verde
+    }
+  }, eur(parseFloat(r.importo))), r.duplicato && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: fontBody,
+      fontSize: 11,
+      fontWeight: 700,
+      color: "#fff",
+      background: C.rosso,
+      borderRadius: 5,
+      padding: "1px 7px"
+    }
+  }, "GIÀ IN ARCHIVIO"), r.avvisi?.length > 0 && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: fontBody,
+      fontSize: 11,
+      fontWeight: 700,
+      color: "#6e4a10",
+      background: C.ambraSoft,
+      borderRadius: 5,
+      padding: "1px 7px"
+    }
+  }, "DA VERIFICARE")), r.avvisi?.length > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 6,
+      fontSize: 12,
+      color: "#6e4a10",
+      lineHeight: 1.5
+    }
+  }, r.avvisi.map((a, j) => /*#__PURE__*/React.createElement("div", {
+    key: j,
+    style: {
+      display: "flex",
+      gap: 6
+    }
+  }, /*#__PURE__*/React.createElement(AlertTriangle, {
+    size: 12,
+    style: {
+      flexShrink: 0,
+      marginTop: 2
+    }
+  }), a))), /*#__PURE__*/React.createElement("select", {
+    value: r.utenza || "",
+    onChange: e => setRiga(i, {
+      utenza: e.target.value || null
+    }),
+    style: {
+      ...inputStyle,
+      marginTop: 7,
+      padding: "6px 9px",
+      fontSize: 13,
+      borderColor: r.utenza ? C.line : C.ambra
+    }
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, "— abbina a utenza —"), utenze.map(u => /*#__PURE__*/React.createElement("option", {
+    key: u.id,
+    value: u.id
+  }, u.luogo, " · ", tipoBreve(u.tipo), " (PDE ", u.pde, ")")))))))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      borderTop: `1px solid ${C.line}`,
+      paddingTop: 14,
+      flexWrap: "wrap",
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13.5,
+      color: C.inkSoft
+    }
+  }, nUtili, " da importare · totale ", /*#__PURE__*/React.createElement("strong", {
+    style: {
+      fontFamily: fontMono,
+      color: C.ink
+    }
+  }, eur(totImporto))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement(GhostBtn, {
+    onClick: onClose
+  }, "Annulla"), /*#__PURE__*/React.createElement(PrimaryBtn, {
+    onClick: () => onConfirm(righe)
+  }, "Importa ", nUtili, " bollette")))));
+}
+
+/* ============================================================
+   TAB 3 — ANALISI CONSUMI
+============================================================ */
+function Consumi({
+  bollette,
+  utenze,
+  intestatari
+}) {
+  const [sel, setSel] = useState(utenze[0]?.id || "");
+  const u = utenze.find(x => x.id === sel);
+  const tipo = u?.tipo;
+  const dati = useMemo(() => {
+    return bollette.filter(b => b.utenza === sel).map(b => ({
+      ...b,
+      c: parseFloat(b.consumo) || 0,
+      imp: parseFloat(b.importo) || 0
+    })).sort((a, b) => (a.dataInizio || "").localeCompare(b.dataInizio || ""));
+  }, [bollette, sel]);
+  const media = dati.length ? dati.reduce((s, d) => s + d.c, 0) / dati.length : 0;
+  const maxC = Math.max(1, ...dati.map(d => d.c));
+  const totImporto = dati.reduce((s, d) => s + d.imp, 0);
+  const totConsumo = dati.reduce((s, d) => s + d.c, 0);
+  // prezzo medio per unità: il dato che svela se è cambiato il PREZZO e non il consumo
+  const prezzoUnit = totConsumo > 0 ? totImporto / totConsumo : null;
+  const unita = unitaDi(tipo);
+
+  // riepilogo costi per intestatario
+  const perIntestatario = intestatari.map(i => {
+    const us = utenze.filter(x => x.intestatario === i.id).map(x => x.id);
+    const bs = bollette.filter(b => us.includes(b.utenza));
+    return {
+      nome: i.nome,
+      tot: bs.reduce((s, b) => s + (parseFloat(b.importo) || 0), 0),
+      n: bs.length
+    };
+  });
+
+  // Confronto anno su anno: somma per mese (così i conguagli o le doppie bollette
+  // nello stesso mese non vengono persi) e confronta con lo stesso mese dell'anno prima.
+  const confrontoAnnuale = useMemo(() => {
+    const perMese = {};
+    dati.forEach(d => {
+      if (!d.dataInizio) return;
+      const dt = new Date(d.dataInizio);
+      const k = `${dt.getFullYear()}-${dt.getMonth()}`;
+      if (!perMese[k]) perMese[k] = {
+        anno: dt.getFullYear(),
+        mese: dt.getMonth(),
+        c: 0,
+        imp: 0
+      };
+      perMese[k].c += d.c;
+      perMese[k].imp += d.imp;
+    });
+    return Object.values(perMese).sort((a, b) => a.anno - b.anno || a.mese - b.mese).map(m => {
+      const prev = perMese[`${m.anno - 1}-${m.mese}`];
+      return prev ? {
+        d: m,
+        prev
+      } : null;
+    }).filter(Boolean);
+  }, [dati]);
+  const fmtMese = m => `${MESI[m.mese]} ${String(m.anno).slice(2)}`;
+  const fmtPeriodo = b => {
+    if (!b.dataInizio) return "?";
+    const d = new Date(b.dataInizio);
+    return `${MESI[d.getMonth()]} ${String(d.getFullYear()).slice(2)}`;
+  };
+
+  /* ===================== DASHBOARD: viste e analisi ===================== */
+  const [vista, setVista] = useState("spesa"); // spesa | andamento | anomalie | pagamenti
+  const annoOggi = oggiISO().slice(0, 4);
+  const tipoOf = id => utenze.find(x => x.id === id)?.tipo || "elettrico";
+  const colTipo = t => t === "gas" ? C.gasBlue : t === "acqua" ? C.verde : C.ambra;
+
+  // Spesa per anno, ripartita per tipo
+  const anniSpesa = (() => {
+    const m = {};
+    bollette.forEach(b => {
+      const a = (b.dataInizio || b.scadenza || "").slice(0, 4);
+      if (!a) return;
+      if (!m[a]) m[a] = { anno: a, tot: 0, elettrico: 0, gas: 0, acqua: 0 };
+      const imp = parseFloat(b.importo) || 0;
+      m[a].tot += imp;
+      m[a][tipoOf(b.utenza)] += imp;
+    });
+    return Object.values(m).sort((x, y) => x.anno.localeCompare(y.anno));
+  })();
+  // Aggregati per utenza
+  const perUtenza = utenze.map(u => {
+    const bs = bollette.filter(b => b.utenza === u.id);
+    const spesa = bs.reduce((s, b) => s + (parseFloat(b.importo) || 0), 0);
+    const consumo = bs.reduce((s, b) => s + (parseFloat(b.consumo) || 0), 0);
+    const qf = bs.reduce((s, b) => s + (parseFloat(b.quotaFissa) || 0), 0);
+    const n = bs.length;
+    return { u, n, spesa, consumo, qf, consumoMedio: n ? consumo / n : 0, prezzo: consumo > 0 ? spesa / consumo : null };
+  });
+  const classifica = perUtenza.filter(x => x.spesa > 0).sort((a, b) => b.spesa - a.spesa);
+  const perIntest = intestatari.map(i => {
+    const ids = utenze.filter(x => x.intestatario === i.id).map(x => x.id);
+    const bs = bollette.filter(b => ids.includes(b.utenza));
+    return { nome: i.nome, tot: bs.reduce((s, b) => s + (parseFloat(b.importo) || 0), 0), n: bs.length };
+  }).sort((a, b) => b.tot - a.tot);
+  // Anomalie / utenze "da chiudere"
+  const SOGLIA = { elettrico: 10, gas: 5, acqua: 2 };
+  const anomalie = perUtenza.map(x => {
+    const f = [];
+    const s = SOGLIA[x.u.tipo] ?? 10;
+    const pot = parseFloat(x.u.potenza) || 0;
+    if (x.n > 0 && x.consumoMedio < s) f.push({ t: pot >= 6 && x.u.tipo === "elettrico" ? `Alta potenza (${x.u.potenza} kW) ma consumo quasi nullo` : "Consumo quasi nullo", grave: true });
+    if (x.spesa > 0 && x.qf > 0 && x.qf / x.spesa > 0.6) f.push({ t: `Paghi soprattutto la quota fissa (${Math.round(x.qf / x.spesa * 100)}% del totale)`, grave: false });
+    if (x.n === 0) f.push({ t: "Nessuna bolletta registrata: impossibile valutarne i consumi", grave: false });
+    if (/chiud|chiar|definire|verific|sospett|ridotta/i.test(x.u.note || "")) f.push({ t: `Nota: ${x.u.note}`, grave: false });
+    return { ...x, f };
+  }).filter(x => x.f.length).sort((a, b) => (b.f.some(z => z.grave) ? 1 : 0) - (a.f.some(z => z.grave) ? 1 : 0) || b.spesa - a.spesa);
+  // Pagamenti e scadenze
+  const nonPag = bollette.filter(b => !b.pagata);
+  const totPagato = bollette.filter(b => b.pagata).reduce((s, b) => s + (parseFloat(b.importo) || 0), 0);
+  const totDaPagare = nonPag.reduce((s, b) => s + (parseFloat(b.importo) || 0), 0);
+  const spesaTotale = bollette.reduce((s, b) => s + (parseFloat(b.importo) || 0), 0);
+  const scadute = nonPag.filter(isScaduta).sort((a, b) => (a.scadenza || "").localeCompare(b.scadenza || ""));
+  const prossime = nonPag.filter(b => b.scadenza && !isScaduta(b)).sort((a, b) => (a.scadenza || "").localeCompare(b.scadenza || ""));
+  const totScadute = scadute.reduce((s, b) => s + (parseFloat(b.importo) || 0), 0);
+  const utenzaNome = id => { const u = utenze.find(x => x.id === id); return u ? `${u.luogo} · ${tipoBreve(u.tipo)}` : "—"; };
+
+  // Helper di rendering
+  const panel = (kids, st) => /*#__PURE__*/React.createElement("div", { style: { background: C.panel, border: `1px solid ${C.line}`, borderRadius: 12, padding: "18px 20px", marginBottom: 16, ...(st || {}) } }, kids);
+  const titolo = (t, sub) => /*#__PURE__*/React.createElement("div", { style: { margin: "0 0 14px" } }, /*#__PURE__*/React.createElement("h2", { style: { fontFamily: fontDisplay, fontSize: 20, margin: 0 } }, t), sub && /*#__PURE__*/React.createElement("div", { style: { fontSize: 13, color: C.inkSoft, marginTop: 4, fontWeight: 400 } }, sub));
+
+  // Sotto-schede
+  const VISTE = [["spesa", "Spesa"], ["andamento", "Andamento & confronti"], ["anomalie", "Anomalie & da chiudere"], ["pagamenti", "Pagamenti & scadenze"]];
+  const elNav = /*#__PURE__*/React.createElement("div", { style: { display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 22 } }, VISTE.map(([id, label]) => /*#__PURE__*/React.createElement("button", { key: id, onClick: () => setVista(id), style: { padding: "8px 14px", borderRadius: 20, fontSize: 13.5, fontWeight: 600, cursor: "pointer", border: `1px solid ${vista === id ? C.verde : C.line}`, background: vista === id ? C.verde : C.panel, color: vista === id ? "#fff" : C.ink } }, label, id === "anomalie" && anomalie.length > 0 && ` (${anomalie.length})`, id === "pagamenti" && scadute.length > 0 && ` ⚠ ${scadute.length}`)));
+
+  // VISTA SPESA
+  const annoMax = Math.max(1, ...anniSpesa.map(a => a.tot));
+  const elSpesa = /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: 14, marginBottom: 24 } }, /*#__PURE__*/React.createElement(Stat, { label: `Spesa ${annoOggi}`, val: eur((anniSpesa.find(a => a.anno === annoOggi) || {}).tot || 0) }), /*#__PURE__*/React.createElement(Stat, { label: "Spesa totale archivio", val: eur(spesaTotale) }), /*#__PURE__*/React.createElement(Stat, { label: "Da pagare", val: eur(totDaPagare) }), /*#__PURE__*/React.createElement(Stat, { label: "Utenze", val: `${utenze.length}` }), /*#__PURE__*/React.createElement(Stat, { label: "Bollette", val: `${bollette.length}` })), panel(/*#__PURE__*/React.createElement(React.Fragment, null, titolo("Andamento della spesa per anno", "ripartita per tipo: luce (ambra), gas (blu), acqua (verde)"), anniSpesa.length === 0 ? /*#__PURE__*/React.createElement("div", { style: { color: C.inkSoft, fontSize: 13 } }, "Nessuna bolletta registrata.") : /*#__PURE__*/React.createElement("div", { style: { display: "grid", gap: 12 } }, anniSpesa.map(a => /*#__PURE__*/React.createElement("div", { key: a.anno, style: { display: "flex", alignItems: "center", gap: 12 } }, /*#__PURE__*/React.createElement("div", { style: { width: 48, fontFamily: fontMono, fontWeight: 700, fontSize: 14 } }, a.anno), /*#__PURE__*/React.createElement("div", { style: { flex: 1, background: "#ECE8DE", borderRadius: 6, height: 22, display: "flex", overflow: "hidden" } }, ["elettrico", "gas", "acqua"].map(t => a[t] > 0 && /*#__PURE__*/React.createElement("div", { key: t, title: `${tipoBreve(t)} ${eur(a[t])}`, style: { width: `${a[t] / annoMax * 100}%`, background: colTipo(t) } }))), /*#__PURE__*/React.createElement("div", { style: { width: 92, textAlign: "right", fontFamily: fontMono, fontWeight: 600, fontSize: 13.5 } }, eur(a.tot))))))));
+
+  // VISTA ANOMALIE
+  const elAnomalie = panel(/*#__PURE__*/React.createElement(React.Fragment, null, titolo("Anomalie e utenze da valutare", "utenze che potrebbero costare senza servire: consumi quasi nulli, quota fissa dominante, note da chiarire"), anomalie.length === 0 ? /*#__PURE__*/React.createElement("div", { style: { color: C.verde, fontSize: 13.5 } }, "Nessuna anomalia evidente. 👍") : /*#__PURE__*/React.createElement("div", { style: { display: "grid", gap: 10 } }, anomalie.map((x, k) => /*#__PURE__*/React.createElement("div", { key: k, style: { border: `1px solid ${x.f.some(z => z.grave) ? C.rosso : C.line}`, borderLeft: `4px solid ${x.f.some(z => z.grave) ? C.rosso : C.ambra}`, borderRadius: 8, padding: "12px 14px" } }, /*#__PURE__*/React.createElement("div", { style: { display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap" } }, /*#__PURE__*/React.createElement("div", { style: { fontWeight: 700, fontSize: 14 } }, x.u.luogo, " ", /*#__PURE__*/React.createElement("span", { style: { color: C.inkSoft, fontWeight: 400 } }, `· ${tipoBreve(x.u.tipo)}${x.u.pde ? ` (PDE ${x.u.pde})` : ""}`)), /*#__PURE__*/React.createElement("div", { style: { fontFamily: fontMono, fontSize: 13, color: C.inkSoft } }, x.n > 0 ? `${eur(x.spesa)} · ${num(x.consumo)} ${unitaDi(x.u.tipo)}` : "nessun dato")), /*#__PURE__*/React.createElement("ul", { style: { margin: "8px 0 0", paddingLeft: 18, fontSize: 13, lineHeight: 1.6 } }, x.f.map((z, j) => /*#__PURE__*/React.createElement("li", { key: j, style: { color: z.grave ? C.rosso : C.ink } }, z.t))))))));
+
+  // VISTA PAGAMENTI
+  const rigaScad = (b, scad) => /*#__PURE__*/React.createElement("div", { key: b.id, style: { display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, padding: "10px 14px", borderTop: `1px solid ${C.line}` } }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", { style: { fontWeight: 600, fontSize: 13.5 } }, utenzaNome(b.utenza)), /*#__PURE__*/React.createElement("div", { style: { fontSize: 12, color: C.inkSoft, fontFamily: fontMono } }, `scad. ${b.scadenza || "—"}${b.numero ? ` · n. ${b.numero}` : ""}`)), /*#__PURE__*/React.createElement("div", { style: { fontFamily: fontMono, fontWeight: 700, color: scad ? C.rosso : C.ink } }, eur(parseFloat(b.importo))));
+  const elPagamenti = /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: 14, marginBottom: 20 } }, /*#__PURE__*/React.createElement(Stat, { label: "Pagato", val: eur(totPagato) }), /*#__PURE__*/React.createElement(Stat, { label: "Da pagare", val: eur(totDaPagare) }), /*#__PURE__*/React.createElement(Stat, { label: "Scaduto non pagato", val: eur(totScadute) })), panel(/*#__PURE__*/React.createElement(React.Fragment, null, titolo(`Scadute e non pagate (${scadute.length})`, "da saldare il prima possibile"), scadute.length === 0 ? /*#__PURE__*/React.createElement("div", { style: { color: C.verde, fontSize: 13.5 } }, "Nessuna bolletta scaduta. 👍") : /*#__PURE__*/React.createElement("div", null, scadute.map(b => rigaScad(b, true))))), panel(/*#__PURE__*/React.createElement(React.Fragment, null, titolo(`Prossime scadenze (${prossime.length})`), prossime.length === 0 ? /*#__PURE__*/React.createElement("div", { style: { color: C.inkSoft, fontSize: 13.5 } }, "Nessuna scadenza futura tra le bollette non pagate.") : /*#__PURE__*/React.createElement("div", null, prossime.map(b => rigaScad(b, false))))));
+
+  // VISTA ANDAMENTO: classifica (nuova) + contenuto storico per-utenza
+  const cMax = Math.max(1, ...classifica.map(x => x.spesa));
+  const elClassifica = panel(/*#__PURE__*/React.createElement(React.Fragment, null, titolo("Classifica utenze per spesa", "dove si concentra di più la spesa"), classifica.length === 0 ? /*#__PURE__*/React.createElement("div", { style: { color: C.inkSoft, fontSize: 13 } }, "Nessuna spesa registrata.") : /*#__PURE__*/React.createElement("div", { style: { display: "grid", gap: 8 } }, classifica.slice(0, 12).map((x, k) => /*#__PURE__*/React.createElement("div", { key: k, style: { display: "flex", alignItems: "center", gap: 12 } }, /*#__PURE__*/React.createElement("div", { style: { flex: "0 0 200px", fontSize: 13, fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, x.u.luogo, " ", /*#__PURE__*/React.createElement("span", { style: { color: C.inkSoft, fontWeight: 400 } }, tipoBreve(x.u.tipo))), /*#__PURE__*/React.createElement("div", { style: { flex: 1, background: "#ECE8DE", borderRadius: 6, height: 18 } }, /*#__PURE__*/React.createElement("div", { style: { width: `${x.spesa / cMax * 100}%`, height: "100%", borderRadius: 6, background: colTipo(x.u.tipo) } })), /*#__PURE__*/React.createElement("div", { style: { flex: "0 0 80px", textAlign: "right", fontFamily: fontMono, fontWeight: 600, fontSize: 13 } }, eur(x.spesa)))), classifica.length > 12 && /*#__PURE__*/React.createElement("div", { style: { fontSize: 12, color: C.inkSoft, marginTop: 4 } }, `… e altre ${classifica.length - 12} utenze`))));
+
+  return /*#__PURE__*/React.createElement("div", null, elNav, vista === "spesa" && elSpesa, vista === "anomalie" && elAnomalie, vista === "pagamenti" && elPagamenti, vista === "andamento" && /*#__PURE__*/React.createElement(React.Fragment, null, elClassifica, /*#__PURE__*/React.createElement("h2", {
+    style: {
+      fontFamily: fontDisplay,
+      fontSize: 20,
+      margin: "0 0 14px"
+    }
+  }, "Costo totale per intestatario"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))",
+      gap: 14,
+      marginBottom: 32
+    }
+  }, perIntestatario.map((p, k) => /*#__PURE__*/React.createElement("div", {
+    key: k,
+    style: {
+      background: C.panel,
+      border: `1px solid ${C.line}`,
+      borderRadius: 12,
+      padding: "16px 18px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13.5,
+      color: C.inkSoft,
+      fontWeight: 600
+    }
+  }, p.nome), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: fontMono,
+      fontSize: 26,
+      fontWeight: 700,
+      color: C.verde,
+      marginTop: 6
+    }
+  }, eur(p.tot)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12.5,
+      color: C.inkSoft,
+      marginTop: 2
+    }
+  }, p.n, " bollette registrate")))), /*#__PURE__*/React.createElement("h2", {
+    style: {
+      fontFamily: fontDisplay,
+      fontSize: 20,
+      margin: "0 0 14px"
+    }
+  }, "Andamento per utenza"), /*#__PURE__*/React.createElement("select", {
+    value: sel,
+    onChange: e => setSel(e.target.value),
+    style: {
+      ...inputStyle,
+      width: "auto",
+      maxWidth: 420,
+      marginBottom: 20
+    }
+  }, utenze.map(x => /*#__PURE__*/React.createElement("option", {
+    key: x.id,
+    value: x.id
+  }, x.luogo, " · ", tipoBreve(x.tipo), " (PDE ", x.pde, ")"))), dati.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.panel,
+      border: `1px dashed ${C.line}`,
+      borderRadius: 12,
+      padding: 40,
+      textAlign: "center",
+      color: C.inkSoft
+    }
+  }, /*#__PURE__*/React.createElement(BarChart3, {
+    size: 32,
+    style: {
+      opacity: .4
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 10
+    }
+  }, "Nessuna bolletta per questa utenza. Aggiungine qualcuna dalla scheda “Bollette”.")) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))",
+      gap: 14,
+      marginBottom: 24
+    }
+  }, /*#__PURE__*/React.createElement(Stat, {
+    label: "Consumo medio",
+    val: `${num(media)} ${unita}`
+  }), /*#__PURE__*/React.createElement(Stat, {
+    label: "Consumo totale",
+    val: `${num(totConsumo)} ${unita}`
+  }), /*#__PURE__*/React.createElement(Stat, {
+    label: "Spesa totale",
+    val: eur(totImporto)
+  }), /*#__PURE__*/React.createElement(Stat, {
+    label: `Prezzo medio €/${unita}`,
+    val: prezzoUnit != null ? prezzoUnit.toLocaleString("it-IT", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 3
+    }) : "—"
+  }), /*#__PURE__*/React.createElement(Stat, {
+    label: "Bollette",
+    val: dati.length
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.panel,
+      border: `1px solid ${C.line}`,
+      borderRadius: 12,
+      padding: "22px 20px 16px",
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: C.inkSoft,
+      marginBottom: 18
+    }
+  }, "Consumo per periodo · la linea tratteggiata è la media. Le barre rosse superano la media di oltre il 30% (possibile anomalia o errore di fattura)."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "flex-end",
+      gap: 10,
+      height: 200,
+      position: "relative",
+      borderBottom: `2px solid ${C.line}`,
+      paddingTop: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "absolute",
+      left: 0,
+      right: 0,
+      bottom: `${media / maxC * 180 + 0}px`,
+      borderTop: `1px dashed ${C.verde}`,
+      opacity: .7
+    }
+  }), dati.map((d, k) => {
+    const h = d.c / maxC * 180;
+    const anomalia = media > 0 && d.c > media * 1.3;
+    return /*#__PURE__*/React.createElement("div", {
+      key: k,
+      style: {
+        flex: 1,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 6,
+        minWidth: 28
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontFamily: fontMono,
+        fontSize: 10.5,
+        color: C.inkSoft
+      }
+    }, num(d.c)), /*#__PURE__*/React.createElement("div", {
+      title: `${num(d.c)} · ${eur(d.imp)}`,
+      style: {
+        width: "100%",
+        maxWidth: 46,
+        height: Math.max(3, h),
+        borderRadius: "4px 4px 0 0",
+        background: anomalia ? C.rosso : tipo === "gas" ? C.gasBlue : C.ambra,
+        transition: "height .4s ease"
+      }
+    }), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10.5,
+        color: C.inkSoft,
+        transform: "rotate(-35deg)",
+        whiteSpace: "nowrap",
+        height: 14
+      }
+    }, fmtPeriodo(d)));
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.panel,
+      border: `1px solid ${C.line}`,
+      borderRadius: 12,
+      overflow: "hidden",
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "12px 18px",
+      borderBottom: `1px solid ${C.line}`,
+      fontWeight: 600,
+      fontSize: 14
+    }
+  }, "Variazioni periodo su periodo"), dati.map((d, k) => {
+    const prev = k > 0 ? dati[k - 1].c : null;
+    const delta = prev ? (d.c - prev) / prev * 100 : null;
+    const Tr = delta == null ? Minus : delta > 5 ? TrendingUp : delta < -5 ? TrendingDown : Minus;
+    const col = delta == null ? C.inkSoft : delta > 15 ? C.rosso : delta > 5 ? C.ambra : delta < -5 ? C.verde : C.inkSoft;
+    return /*#__PURE__*/React.createElement("div", {
+      key: k,
+      style: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: "10px 18px",
+        borderTop: k ? `1px solid ${C.line}` : "none",
+        fontSize: 13.5
+      }
+    }, /*#__PURE__*/React.createElement("span", null, fmtPeriodo(d), " · ", /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontFamily: fontMono
+      }
+    }, num(d.c), " ", unita)), /*#__PURE__*/React.createElement("span", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 6,
+        color: col,
+        fontWeight: 600,
+        fontFamily: fontMono
+      }
+    }, /*#__PURE__*/React.createElement(Tr, {
+      size: 15
+    }), delta == null ? "—" : `${delta > 0 ? "+" : ""}${num(delta)}%`));
+  })), confrontoAnnuale.length > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.panel,
+      border: `1px solid ${C.line}`,
+      borderRadius: 12,
+      overflow: "hidden"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "12px 18px",
+      borderBottom: `1px solid ${C.line}`,
+      fontWeight: 600,
+      fontSize: 14
+    }
+  }, "Confronto con l'anno precedente", /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 400,
+      fontSize: 12.5,
+      color: C.inkSoft,
+      marginLeft: 8
+    }
+  }, "stesso mese, anno prima · utile per scovare perdite o contatori anomali")), confrontoAnnuale.map(({
+    d,
+    prev
+  }, k) => {
+    const delta = prev.c > 0 ? (d.c - prev.c) / prev.c * 100 : null;
+    const pNow = d.c > 0 ? d.imp / d.c : null;
+    const pPrev = prev.c > 0 ? prev.imp / prev.c : null;
+    const dPrezzo = pNow != null && pPrev > 0 ? (pNow - pPrev) / pPrev * 100 : null;
+    const Tr = delta == null ? Minus : delta > 5 ? TrendingUp : delta < -5 ? TrendingDown : Minus;
+    const col = delta == null ? C.inkSoft : delta > 20 ? C.rosso : delta > 5 ? C.ambra : delta < -5 ? C.verde : C.inkSoft;
+    return /*#__PURE__*/React.createElement("div", {
+      key: k,
+      style: {
+        padding: "10px 18px",
+        borderTop: k ? `1px solid ${C.line}` : "none",
+        fontSize: 13.5
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        flexWrap: "wrap",
+        gap: 6
+      }
+    }, /*#__PURE__*/React.createElement("span", null, fmtMese(d), " · ", /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontFamily: fontMono
+      }
+    }, num(d.c)), /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: C.inkSoft
+      }
+    }, " vs ", fmtMese(prev), " · "), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontFamily: fontMono,
+        color: C.inkSoft
+      }
+    }, num(prev.c), " ", unita)), /*#__PURE__*/React.createElement("span", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 6,
+        color: col,
+        fontWeight: 600,
+        fontFamily: fontMono
+      }
+    }, /*#__PURE__*/React.createElement(Tr, {
+      size: 15
+    }), delta == null ? "—" : `${delta > 0 ? "+" : ""}${num(delta)}%`)), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12,
+        color: C.inkSoft,
+        marginTop: 3,
+        fontFamily: fontMono
+      }
+    }, "spesa ", eur(d.imp), " vs ", eur(prev.imp), dPrezzo != null && /*#__PURE__*/React.createElement(React.Fragment, null, " · prezzo €/", unita, " ", dPrezzo > 0 ? "+" : "", num(dPrezzo), "%", Math.abs(dPrezzo) > 10 && /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: dPrezzo > 0 ? C.rosso : C.verde,
+        fontWeight: 700
+      }
+    }, " ", dPrezzo > 0 ? "← è salito il prezzo, non (solo) il consumo" : "← il prezzo è sceso"))));
+  })))));
+}
+function Stat({
+  label,
+  val
+}) {
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.panel,
+      border: `1px solid ${C.line}`,
+      borderRadius: 12,
+      padding: "14px 16px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: C.inkSoft,
+      fontWeight: 600
+    }
+  }, label), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: fontMono,
+      fontSize: 20,
+      fontWeight: 700,
+      marginTop: 4
+    }
+  }, val));
+}
+
+/* ============================================================
+   TAB 4 — AZIONI APERTE
+============================================================ */
+function Azioni({
+  azioni,
+  setAzioni,
+  utenze
+}) {
+  const [modal, setModal] = useState(null);
+  const luogoDi = id => utenze.find(u => u.id === id)?.luogo;
+  const toggle = id => setAzioni(a => a.map(x => x.id === id ? {
+    ...x,
+    fatto: !x.fatto
+  } : x));
+  const del = id => setAzioni(a => a.filter(x => x.id !== id));
+  const save = a => {
+    if (a.id) setAzioni(x => x.map(y => y.id === a.id ? a : y));else setAzioni(x => [...x, {
+      ...a,
+      id: uid(),
+      fatto: false
+    }]);
+    setModal(null);
+  };
+  const aperte = azioni.filter(a => !a.fatto);
+  const chiuse = azioni.filter(a => a.fatto);
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 18,
+      flexWrap: "wrap",
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", {
+    style: {
+      fontFamily: fontDisplay,
+      fontSize: 20,
+      margin: 0
+    }
+  }, "Verifiche e passaggi operativi"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13.5,
+      color: C.inkSoft,
+      marginTop: 4
+    }
+  }, aperte.length, " aperte · ", chiuse.length, " completate")), /*#__PURE__*/React.createElement(PrimaryBtn, {
+    onClick: () => setModal({})
+  }, /*#__PURE__*/React.createElement(Plus, {
+    size: 16
+  }), " Azione")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gap: 12
+    }
+  }, aperte.map(a => /*#__PURE__*/React.createElement(AzioneCard, {
+    key: a.id,
+    a: a,
+    luogo: luogoDi(a.utenza),
+    onToggle: () => toggle(a.id),
+    onEdit: () => setModal(a),
+    onDel: () => del(a.id)
+  })), aperte.length === 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.panel,
+      border: `1px solid ${C.line}`,
+      borderRadius: 12,
+      padding: 28,
+      textAlign: "center",
+      color: C.verde,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement(CheckCircle2, {
+    size: 20
+  }), " Tutte le verifiche sono completate.")), chiuse.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      fontWeight: 600,
+      color: C.inkSoft,
+      margin: "26px 0 10px",
+      textTransform: "uppercase",
+      letterSpacing: .5
+    }
+  }, "Completate"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gap: 10
+    }
+  }, chiuse.map(a => /*#__PURE__*/React.createElement(AzioneCard, {
+    key: a.id,
+    a: a,
+    luogo: luogoDi(a.utenza),
+    onToggle: () => toggle(a.id),
+    onEdit: () => setModal(a),
+    onDel: () => del(a.id)
+  })))), modal && /*#__PURE__*/React.createElement(AzioneModal, {
+    data: modal,
+    utenze: utenze,
+    onSave: save,
+    onClose: () => setModal(null)
+  }));
+}
+function AzioneCard({
+  a,
+  luogo,
+  onToggle,
+  onEdit,
+  onDel
+}) {
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.panel,
+      border: `1px solid ${a.fatto ? C.line : "#E2C9A3"}`,
+      borderLeft: `4px solid ${a.fatto ? C.verde : C.ambra}`,
+      borderRadius: 10,
+      padding: "14px 16px",
+      display: "flex",
+      gap: 12,
+      opacity: a.fatto ? .7 : 1
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "icon-btn",
+    onClick: onToggle,
+    style: {
+      background: "none",
+      border: "none",
+      padding: 0,
+      color: a.fatto ? C.verde : C.inkSoft,
+      flexShrink: 0,
+      marginTop: 1
+    }
+  }, a.fatto ? /*#__PURE__*/React.createElement(CheckCircle2, {
+    size: 22
+  }) : /*#__PURE__*/React.createElement(Circle, {
+    size: 22
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 600,
+      fontSize: 14.5,
+      textDecoration: a.fatto ? "line-through" : "none"
+    }
+  }, a.titolo), a.dettaglio && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: C.inkSoft,
+      marginTop: 4,
+      lineHeight: 1.5
+    }
+  }, a.dettaglio), luogo && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11.5,
+      color: C.verde,
+      marginTop: 6,
+      fontWeight: 600
+    }
+  }, "↳ ", luogo)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 4
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "icon-btn",
+    onClick: onEdit,
+    style: {
+      background: "none",
+      border: "none",
+      color: C.inkSoft,
+      padding: 4
+    }
+  }, /*#__PURE__*/React.createElement(Pencil, {
+    size: 15
+  })), /*#__PURE__*/React.createElement("button", {
+    className: "icon-btn",
+    onClick: onDel,
+    style: {
+      background: "none",
+      border: "none",
+      color: C.rosso,
+      padding: 4
+    }
+  }, /*#__PURE__*/React.createElement(Trash2, {
+    size: 15
+  }))));
+}
+function AzioneModal({
+  data,
+  utenze,
+  onSave,
+  onClose
+}) {
+  const [f, setF] = useState({
+    id: data.id || "",
+    titolo: data.titolo || "",
+    dettaglio: data.dettaglio || "",
+    utenza: data.utenza || "",
+    fatto: data.fatto || false
+  });
+  const set = (k, v) => setF(s => ({
+    ...s,
+    [k]: v
+  }));
+  return /*#__PURE__*/React.createElement(Modal, {
+    title: data.id ? "Modifica azione" : "Nuova azione",
+    onClose: onClose
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gap: 14
+    }
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: "Titolo"
+  }, /*#__PURE__*/React.createElement("input", {
+    value: f.titolo,
+    onChange: e => set("titolo", e.target.value),
+    style: inputStyle,
+    placeholder: "es. Chiusura contratto gas Chiesa"
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "Dettaglio"
+  }, /*#__PURE__*/React.createElement("textarea", {
+    value: f.dettaglio,
+    onChange: e => set("dettaglio", e.target.value),
+    rows: 3,
+    style: {
+      ...inputStyle,
+      resize: "vertical"
+    }
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "Utenza collegata (opzionale)"
+  }, /*#__PURE__*/React.createElement("select", {
+    value: f.utenza,
+    onChange: e => set("utenza", e.target.value),
+    style: inputStyle
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, "— nessuna —"), utenze.map(u => /*#__PURE__*/React.createElement("option", {
+    key: u.id,
+    value: u.id
+  }, u.luogo, " (PDE ", u.pde, ")")))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "flex-end",
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement(GhostBtn, {
+    onClick: onClose
+  }, "Annulla"), /*#__PURE__*/React.createElement(PrimaryBtn, {
+    onClick: () => onSave(f)
+  }, "Salva azione"))));
+}
+        var root = ReactDOM.createRoot(document.getElementById("root"));
+        root.render(React.createElement(App));
+      } catch (e) {
+        document.getElementById("root").innerHTML =
+          '<div id="avvio"><h1 class="err">Errore di avvio</h1><p>' + (e && e.message ? e.message : e) + '</p></div>';
+        if (window.console) console.error(e);
+      }
+    }
+    if (document.readyState === "complete" || document.readyState === "interactive") setTimeout(avvia, 0);
+    else window.addEventListener("DOMContentLoaded", avvia);
+  })();
+  </script>
+</body>
+</html>

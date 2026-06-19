@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<base target="_top">
+<style>
+  :root{
+    --bg:#F3F1EC; --panel:#FBFAF6; --ink:#23302E; --inkSoft:#5C6B68;
+    --line:#DAD6CB; --verde:#3E6B5E; --verdeDk:#2C4F45; --ambra:#C8841E;
+    --ambraSoft:#F4E3C4; --gas:#3D6A8C; --rosso:#B0492F;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    --body:"Inter","Segoe UI",system-ui,sans-serif;
+    --mono:"SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body)}
+  header{background:var(--verdeDk);color:#F3F1EC;border-bottom:3px solid var(--ambra)}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 20px}
+  .htop{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:24px 20px 20px;flex-wrap:wrap}
+  .kicker{font-family:var(--mono);font-size:11.5px;letter-spacing:2px;text-transform:uppercase;color:var(--ambraSoft);margin-bottom:6px}
+  h1{margin:0;font-family:var(--serif);font-size:30px;font-weight:600}
+  .stato{font-family:var(--mono);font-size:12px;color:#C9D6D1;text-align:right;line-height:1.7}
+  nav{display:flex;gap:4px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tab{padding:14px 16px;background:none;border:none;border-bottom:2px solid transparent;color:var(--inkSoft);font-weight:500;font-size:14.5px;cursor:pointer;font-family:inherit}
+  .tab.on{color:var(--ink);font-weight:600;border-bottom-color:var(--verde)}
+  main{max-width:1100px;margin:0 auto;padding:28px 20px 80px}
+  h2{font-family:var(--serif);font-size:20px;margin:0 0 14px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-bottom:28px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .card .nome{font-weight:600;font-size:15px}
+  .card .cf{font-family:var(--mono);font-size:12px;color:var(--inkSoft);margin-top:4px}
+  .card .conta{margin-top:10px;font-size:13px}
+  .conta .el{color:var(--ambra);font-weight:600} .conta .ga{color:var(--gas);font-weight:600} .conta .ac{color:var(--verde);font-weight:600}
+  table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:14px}
+  th{background:var(--verdeDk);color:#fff;text-align:left;padding:11px 14px;font-size:12.5px;font-weight:600}
+  td{padding:11px 14px;border-top:1px solid var(--line);vertical-align:top}
+  .pill{display:inline-block;border-radius:20px;padding:2px 9px;font-size:11.5px;font-weight:600}
+  .pill.el{background:var(--ambraSoft);color:#6e4a10} .pill.ga{background:#D9E6EE;color:#234} .pill.ac{background:#DCEBE5;color:#1f4}
+  .mono{font-family:var(--mono)}
+  .center{display:grid;place-items:center;min-height:60vh;color:var(--inkSoft);text-align:center;padding:20px}
+  .soft{color:var(--inkSoft);font-size:13px}
+  .avviso{background:var(--ambraSoft);border:1px solid #E7CE9E;border-radius:12px;padding:14px 18px;color:#6e4a10;font-size:13.5px;margin-bottom:18px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border-radius:8px;padding:10px 16px;font-size:14px;font-weight:600;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-family:inherit}
+  .btn.pri{background:var(--verde);color:#fff;border-color:var(--verde)}
+  .btn.dk{background:var(--verdeDk);color:#fff;border-color:var(--verdeDk)}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
+  .form{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:20px}
+  .form .riga{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:14px}
+  label.f{display:block;font-size:12.5px;font-weight:600;color:var(--inkSoft);margin-bottom:6px}
+  .inp{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-size:14px;background:#fff;color:var(--ink);font-family:inherit}
+  a.link{color:var(--gas);text-decoration:none;font-weight:600}
+  .iconbtn{background:none;border:none;cursor:pointer;color:var(--inkSoft);font-size:14px;padding:4px 6px;font-family:inherit}
+  .iconbtn.del{color:var(--rosso)}
+</style>
+</head>
+<body>
+  <div id="boot" class="center">
+    <div>
+      <div style="font-family:var(--serif);font-size:20px;color:var(--ink)">Apertura dell'archivio…</div>
+      <div class="soft" style="margin-top:8px">Sto leggendo i dati dal Foglio Google.</div>
+    </div>
+  </div>
+  <div id="app" style="display:none">
+    <header>
+      <div class="htop">
+        <div>
+          <div class="kicker">Registro centralizzato &middot; Energia &amp; Gas</div>
+          <h1>Gestione Utenze</h1>
+        </div>
+        <div class="stato">archivio su Google Apps Script<br><span style="color:var(--ambraSoft)" id="statoSync">caricato</span></div>
+      </div>
+      <nav class="wrap" id="nav"></nav>
+    </header>
+    <main id="main"></main>
+  </div>
+<script>
+  var STATO=null, TAB="utenze", FORM=null;
+  var TABS=[{id:"utenze",label:"Utenze"},{id:"bollette",label:"Bollette"},{id:"consumi",label:"Analisi consumi"},{id:"azioni",label:"Azioni aperte"}];
+  function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+  function uid(){return 'b-'+Date.now()+'-'+Math.floor(Math.random()*100000);}
+  function eur(v){var n=parseFloat(v);return isNaN(n)?"—":n.toLocaleString("it-IT",{style:"currency",currency:"EUR"});}
+  function statoSync(t){var e=document.getElementById("statoSync"); if(e)e.textContent=t;}
+  function tipoBreve(t){return t==="gas"?"Gas":t==="acqua"?"Acqua":"El.";}
+  function nBollette(uid){return STATO.bollette.filter(function(b){return b.utenza===uid;}).length;}
+  function utenzaLabel(id){if(!id)return "⚠ DA ABBINARE"; var u=STATO.utenze.filter(function(x){return x.id===id;})[0]; return u?(u.luogo+" · "+tipoBreve(u.tipo)):"⚠ DA ABBINARE";}
+  function utenzaTipo(id){var u=STATO.utenze.filter(function(x){return x.id===id;})[0]; return u?u.tipo:"";}
+  function unitaDi(tipo){return tipo==="gas"?"Smc":tipo==="acqua"?"mc":"kWh";}
+  function dataIT(s){if(!s)return "—"; var p=String(s).split("-"); return p.length===3?(p[2]+"/"+p[1]+"/"+p[0]):s;}
+  function numIT(v){var n=parseFloat(v); return isNaN(n)?"—":n.toLocaleString("it-IT",{maximumFractionDigits:2});}
+  function oggiISO(){var d=new Date(); function p(n){return n<10?"0"+n:""+n;} return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());}
+  function isScaduta(b){return !b.pagata && b.scadenza && b.scadenza < oggiISO();}
+  function togglePagata(id){var b=STATO.bollette.filter(function(x){return x.id===id;})[0]; if(b){b.pagata=!b.pagata; salvaTutto(); render();}}
+
+  function avvia(){ google.script.run.withSuccessHandler(onCaricato).withFailureHandler(onErrore).apiCarica(); }
+  function onCaricato(json){
+    try{STATO=json?JSON.parse(json):null;}catch(e){STATO=null;}
+    if(!STATO){STATO={intestatari:[],utenze:[],bollette:[],azioni:[]};}
+    STATO.intestatari=STATO.intestatari||[]; STATO.utenze=STATO.utenze||[];
+    STATO.bollette=STATO.bollette||[]; STATO.azioni=STATO.azioni||[];
+    document.getElementById("boot").style.display="none";
+    document.getElementById("app").style.display="block";
+    renderNav(); render();
+  }
+  function onErrore(err){
+    document.getElementById("boot").innerHTML='<div><div style="font-family:var(--serif);font-size:20px;color:var(--rosso)">Errore di lettura</div><div class="soft" style="margin-top:8px">'+esc(err&&err.message?err.message:err)+'</div></div>';
+  }
+
+  // salva tutto l'archivio nel Foglio
+  function salvaTutto(){
+    statoSync("salvataggio…");
+    google.script.run.withSuccessHandler(function(){statoSync("salvato ✓");}).withFailureHandler(function(e){statoSync("errore salvataggio");}).apiSalva(JSON.stringify(STATO));
+  }
+
+  function renderNav(){
+    var nav=document.getElementById("nav");
+    nav.innerHTML=TABS.map(function(t){return '<button class="tab'+(t.id===TAB?' on':'')+'" data-tab="'+t.id+'">'+esc(t.label)+'</button>';}).join("");
+    Array.prototype.forEach.call(nav.querySelectorAll(".tab"),function(btn){btn.onclick=function(){TAB=btn.getAttribute("data-tab");FORM=null;renderNav();render();};});
+  }
+
+  function render(){
+    var m=document.getElementById("main");
+    if(TAB==="utenze"){m.innerHTML=vistaUtenze();return;}
+    if(TAB==="bollette"){m.innerHTML=vistaBollette();return;}
+    m.innerHTML='<div class="avviso">La sezione <b>'+esc(TABS.filter(function(t){return t.id===TAB;})[0].label)+'</b> sarà aggiunta a breve.</div>';
+  }
+
+  function vistaUtenze(){
+    var html='<h2>Anagrafica utenze</h2><div class="grid">';
+    STATO.intestatari.forEach(function(i){
+      var us=STATO.utenze.filter(function(u){return u.intestatario===i.id;});
+      var el=us.filter(function(u){return u.tipo==="elettrico";}).length;
+      var ga=us.filter(function(u){return u.tipo==="gas";}).length;
+      var ac=us.filter(function(u){return u.tipo==="acqua";}).length;
+      var c=[]; if(el)c.push('<span class="el">'+el+' elettriche</span>'); if(ga)c.push('<span class="ga">'+ga+' gas</span>'); if(ac)c.push('<span class="ac">'+ac+' acqua</span>');
+      html+='<div class="card"><div class="nome">'+esc(i.nome)+'</div><div class="cf">CF '+esc(i.cf||"—")+' · Cliente '+esc(i.codiceCliente||"—")+'</div><div class="conta">'+(c.join(" &nbsp; ")||'<span class="soft">nessuna utenza</span>')+'</div></div>';
+    });
+    html+='</div><h2>Elenco utenze</h2><table><thead><tr><th>Luogo</th><th>Tipo</th><th>POD / PDR</th><th>PDE</th><th>Potenza</th><th>Bollette</th></tr></thead><tbody>';
+    STATO.utenze.forEach(function(u){
+      var cls=u.tipo==="gas"?"ga":u.tipo==="acqua"?"ac":"el";
+      html+='<tr><td><b>'+esc(u.luogo)+'</b><div class="soft">'+esc(u.indirizzo||"")+'</div></td><td><span class="pill '+cls+'">'+esc(tipoBreve(u.tipo))+'</span></td><td class="mono">'+esc(u.codice||"—")+'</td><td class="mono">'+esc(u.pde||"—")+'</td><td class="mono">'+(u.potenza!=null&&u.potenza!==""?esc(u.potenza)+" kW":"—")+'</td><td class="mono" style="text-align:center">'+nBollette(u.id)+'</td></tr>';
+    });
+    html+='</tbody></table><div class="soft" style="margin-top:10px">'+STATO.utenze.length+' utenze · '+STATO.bollette.length+' bollette</div>';
+    return html;
+  }
+
+  // ---- BOLLETTE ----
+  function vistaBollette(){
+    var html='<h2>Bollette</h2>';
+    html+='<div class="toolbar">'+
+      '<label class="btn dk"><input type="file" accept="application/pdf" style="display:none" onchange="onFilePdf(this)"> Carica PDF (va su Drive)</label>'+
+      '<button class="btn" onclick="apriForm()">+ Aggiungi a mano</button>'+
+      '<span class="soft">'+STATO.bollette.length+' bollette in archivio</span></div>';
+    if(FORM) html+=formBolletta();
+    if(STATO.bollette.length===0 && !FORM){
+      html+='<div class="avviso">Nessuna bolletta. Usa <b>Carica PDF</b> (il file finisce su Drive e poi compili i dati) oppure <b>Aggiungi a mano</b>.</div>';
+      return html;
+    }
+    if(STATO.bollette.length){
+      html+='<table><thead><tr><th>Utenza</th><th>Periodo</th><th>Consumo</th><th>Importo</th><th>Scadenza</th><th>Stato</th><th>PDF</th><th></th></tr></thead><tbody>';
+      var tot=0;
+      STATO.bollette.slice().sort(function(a,b){return (b.dataInizio||"").localeCompare(a.dataInizio||"");}).forEach(function(b){
+        var tipo=utenzaTipo(b.utenza); tot+=parseFloat(b.importo)||0;
+        var scad=isScaduta(b); var stato=b.pagata?"Pagata":(scad?"Scaduta":"Da pagare");
+        var col=b.pagata?"#1f5e3a":(scad?"#8a2a16":"#6e4a10"); var bg=b.pagata?"#DCEBE5":(scad?"#F2DCD4":"#F4E3C4");
+        html+='<tr><td><b>'+esc(utenzaLabel(b.utenza))+'</b>'+(b.numero?'<div class="soft">n. '+esc(b.numero)+'</div>':'')+'</td>'+
+          '<td class="mono">'+esc(dataIT(b.dataInizio))+' → '+esc(dataIT(b.dataFine))+'</td>'+
+          '<td class="mono">'+((b.consumo!==""&&b.consumo!=null)?(numIT(b.consumo)+" "+unitaDi(tipo)):"—")+'</td>'+
+          '<td class="mono"><b>'+eur(b.importo)+'</b>'+(b.quotaFissa?'<div class="soft">di cui fissa '+eur(b.quotaFissa)+'</div>':'')+'</td>'+
+          '<td class="mono">'+esc(dataIT(b.scadenza))+'</td>'+
+          '<td><button class="iconbtn" title="clic per cambiare stato" onclick="togglePagata(\''+b.id+'\')" style="background:'+bg+';color:'+col+';border-radius:20px;padding:3px 10px;font-weight:600;font-size:12px;border:none">'+stato+'</button></td>'+
+          '<td>'+(b.linkDrive?'<a class="link" target="_blank" href="'+esc(b.linkDrive)+'">apri</a>':'<span class="soft">—</span>')+'</td>'+
+          '<td style="white-space:nowrap"><button class="iconbtn" onclick="apriForm(\''+b.id+'\')">modifica</button><button class="iconbtn del" onclick="eliminaBolletta(\''+b.id+'\')">elimina</button></td></tr>';
+      });
+      html+='</tbody></table><div class="soft" style="margin-top:10px">'+STATO.bollette.length+' bollette · totale '+eur(tot)+'</div>';
+    }
+    return html;
+  }
+
+  function formBolletta(){
+    var f=FORM||{};
+    var opts='<option value=""'+(f.utenza?'':' selected')+'>— da abbinare —</option>'+STATO.utenze.map(function(u){return '<option value="'+u.id+'"'+(f.utenza===u.id?' selected':'')+'>'+esc(u.luogo+" · "+tipoBreve(u.tipo)+" (PDE "+(u.pde||"—")+")")+'</option>';}).join("");
+    return '<div class="form"><h2 style="font-size:17px">'+(f.id?'Modifica bolletta':'Nuova bolletta')+'</h2>'+
+      (f.fileNome?'<div class="soft" style="margin-bottom:12px">PDF su Drive: <b>'+esc(f.fileNome)+'</b> ✓</div>':'')+
+      '<div class="riga">'+
+        '<div style="grid-column:1/-1"><label class="f">Utenza</label><select id="f_utenza" class="inp">'+opts+'</select></div>'+
+      '</div>'+
+      '<div class="riga">'+
+        '<div><label class="f">Periodo dal</label><input id="f_dal" type="date" class="inp" value="'+esc(f.dataInizio||"")+'"></div>'+
+        '<div><label class="f">Periodo al</label><input id="f_al" type="date" class="inp" value="'+esc(f.dataFine||"")+'"></div>'+
+        '<div><label class="f">Scadenza</label><input id="f_scad" type="date" class="inp" value="'+esc(f.scadenza||"")+'"></div>'+
+      '</div>'+
+      '<div class="riga">'+
+        '<div><label class="f">Consumo</label><input id="f_consumo" type="number" step="any" class="inp" value="'+esc(f.consumo||"")+'"></div>'+
+        '<div><label class="f">Importo (€)</label><input id="f_importo" type="number" step="any" class="inp" value="'+esc(f.importo||"")+'"></div>'+
+      '</div>'+
+      '<div class="riga">'+
+        '<div><label class="f">N° fattura</label><input id="f_numero" type="text" class="inp" value="'+esc(f.numero||"")+'"></div>'+
+        '<div><label class="f">di cui quota fissa (€)</label><input id="f_qf" type="number" step="any" class="inp" value="'+esc(f.quotaFissa||"")+'"></div>'+
+      '</div>'+
+      '<div class="riga"><div style="grid-column:1/-1"><label class="f">Link al PDF su Drive</label><input id="f_link" type="text" class="inp" value="'+esc(f.linkDrive||"")+'" placeholder="si compila da solo se carichi il PDF"></div></div>'+
+      '<div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn" onclick="annullaForm()">Annulla</button><button class="btn pri" onclick="salvaBolletta()">Salva bolletta</button></div></div>';
+  }
+
+  function apriForm(id){
+    if(id){ FORM=JSON.parse(JSON.stringify(STATO.bollette.filter(function(b){return b.id===id;})[0]||{})); }
+    else { FORM={utenza:(STATO.utenze[0]||{}).id||"", pagata:false}; }
+    render();
+  }
+  function annullaForm(){ FORM=null; render(); }
+
+  function campoToRec(c,res){
+    c=c||{};
+    return {utenza:c.utenzaId||"", numero:c.numero||"",
+      dataInizio:c.dataInizio||"", dataFine:c.dataFine||"", consumo:c.consumo||"",
+      importo:c.importo||"", quotaFissa:c.quotaFissa||"", scadenza:c.scadenza||"",
+      pagata:false, linkDrive:res.url||"", fileNome:res.nome||""};
+  }
+  function esisteBolletta(rec){
+    return STATO.bollette.some(function(b){
+      if(rec.numero && b.numero) return String(b.numero).trim()===String(rec.numero).trim();
+      return rec.dataInizio && b.utenza===rec.utenza && b.dataInizio===rec.dataInizio;
+    });
+  }
+  function onFilePdf(input){
+    var f=input.files[0]; if(!f) return;
+    statoSync("carico e leggo il PDF…");
+    var r=new FileReader();
+    r.onload=function(){
+      google.script.run.withSuccessHandler(function(res){
+        var righe=(res&&res.righe)||[];
+        if(righe.length>1){
+          var add=0,dup=0;
+          righe.forEach(function(c){var rec=campoToRec(c,res); if(esisteBolletta(rec)){dup++;return;} rec.id=uid(); STATO.bollette.push(rec); add++;});
+          salvaTutto(); FORM=null; render();
+          statoSync("aggiunte "+add+" bollette dal PDF");
+          alert("Il PDF conteneva "+righe.length+" bollette. Aggiunte: "+add+(dup?(" · doppioni saltati: "+dup):"")+". Controllale e correggi se serve.");
+          return;
+        }
+        FORM=campoToRec(righe[0]||{},res);
+        statoSync(righe.length?"PDF letto ✓ — controlla i dati":"PDF su Drive ✓ — compila a mano");
+        render();
+      }).withFailureHandler(function(e){ statoSync("errore PDF"); alert("Errore nel caricare il PDF: "+(e&&e.message?e.message:e)); }).apiCaricaPdf(r.result, f.name);
+    };
+    r.readAsDataURL(f);
+  }
+
+  function salvaBolletta(){
+    var g=function(id){return document.getElementById(id);};
+    var nuovo=!FORM.id;
+    var rec = FORM.id ? STATO.bollette.filter(function(b){return b.id===FORM.id;})[0] : {id:uid(), pagata:false};
+    rec.utenza=g("f_utenza").value;
+    rec.dataInizio=g("f_dal").value;
+    rec.dataFine=g("f_al").value;
+    rec.scadenza=g("f_scad").value;
+    rec.consumo=g("f_consumo").value;
+    rec.importo=g("f_importo").value;
+    rec.linkDrive=g("f_link").value;
+    rec.numero=g("f_numero").value;
+    rec.quotaFissa=g("f_qf").value;
+    if(FORM.fileNome) rec.fileNome=FORM.fileNome;
+    if(nuovo){
+      if(esisteBolletta(rec) && !confirm("Sembra già presente una bolletta uguale (stesso numero, o stessa utenza e periodo). Aggiungere lo stesso?")) return;
+      STATO.bollette.push(rec);
+    }
+    FORM=null;
+    salvaTutto();
+    render();
+  }
+
+  function eliminaBolletta(id){
+    if(!confirm("Eliminare questa bolletta dall'archivio?")) return;
+    STATO.bollette=STATO.bollette.filter(function(b){return b.id!==id;});
+    salvaTutto();
+    render();
+  }
+
+  avvia();
+</script>
+</body>
+</html>

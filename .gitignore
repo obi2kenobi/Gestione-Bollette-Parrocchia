@@ -1,0 +1,13 @@
+# macOS
+.DS_Store
+
+# Tooling locale
+.claude/
+scratchpad/
+
+# File di copia-incolla (ora superati dal repo)
+app-google/*.txt
+
+# Credenziali clasp (NON devono finire nel repo)
+.clasprc.json
+**/.clasprc.json
