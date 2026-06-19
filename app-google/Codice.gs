@@ -349,5 +349,7 @@ function reimportaArchivio(){
   svuotaBollette();
   var giugno = importaCartella("111rRESpsxfALneO7bvQ6I0CMzy1LmmBW"); // giugno 2026 bollete
   var storico = importaCartella("1Hgs3jFSdv1VQE5UBuZKWP5mBaLnLbNSi"); // BOLLETTE (GAS+LUCE)
-  return { giugno: giugno, storico: storico };
+  var esito = { giugno: giugno, storico: storico };
+  Logger.log(JSON.stringify(esito));
+  return esito;
 }
