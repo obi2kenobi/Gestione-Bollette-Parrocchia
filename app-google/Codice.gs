@@ -277,3 +277,77 @@ function svuotaBollette(){
   apiSalva(JSON.stringify(st));
   return "bollette svuotate";
 }
+
+// ---- IMPORT IN BLOCCO da una cartella Drive (stessa logica incrementale del caricamento UI) ----
+function _recDaParse(c, url, nome){
+  return { id:"", utenza:"", numero:c.numero||"", fornitore:c.fornitore||"",
+    dataInizio:c.dataInizio||"", dataFine:c.dataFine||"",
+    consumo:(c.consumo!=null?c.consumo:""), importo:(c.importo!=null?c.importo:""),
+    quotaFissa:(c.quotaFissa!=null?c.quotaFissa:""), scadenza:c.scadenza||"",
+    prezzoUnitario:(c.prezzoUnitario!=null?c.prezzoUnitario:""), consumoAnnuo:(c.consumoAnnuo!=null?c.consumoAnnuo:""),
+    spesaAnnua:(c.spesaAnnua!=null?c.spesaAnnua:""), avvisoInsoluti:!!c.avvisoInsoluti,
+    pagata:false, linkDrive:url||"", fileNome:nome||"" };
+}
+function _trovaOCreaIntStato(c, st, cr){
+  var cod=c.codiceCliente||"";
+  for(var i=0;i<st.intestatari.length;i++) if(cod && st.intestatari[i].codiceCliente===cod) return st.intestatari[i].id;
+  if(c.intestatario) for(var j=0;j<st.intestatari.length;j++) if((st.intestatari[j].nome||"").toUpperCase()===c.intestatario.toUpperCase()) return st.intestatari[j].id;
+  var id="int-"+(cod||("x"+st.intestatari.length));
+  st.intestatari.push({id:id,nome:c.intestatario||("Cliente "+cod),cf:c.cf||"",codiceCliente:cod,fornitore:"Energentium"});
+  cr.intestatari++; return id;
+}
+function _trovaOCreaUtStato(c, intId, st, cr){
+  if(!c.codice) return "";
+  var n=normEnergia(c.codice);
+  for(var i=0;i<st.utenze.length;i++){ var u=st.utenze[i]; if(normEnergia(u.codice)===n){
+    if((u.potenza==null||u.potenza==="")&&c.potenza!=null) u.potenza=c.potenza;
+    if(!u.indirizzo&&c.indirizzoFornitura) u.indirizzo=c.indirizzoFornitura;
+    if(!u.pde&&c.pde) u.pde=c.pde; return u.id; } }
+  var id="u-"+(c.pde||("x"+st.utenze.length));
+  for(var k=0;k<st.utenze.length;k++) if(st.utenze[k].id===id){ id="u-x"+st.utenze.length; break; }
+  var luogo=c.indirizzoFornitura?(c.indirizzoFornitura+(c.pde?" (PDE "+c.pde+")":"")):("PDE "+(c.pde||"?"));
+  st.utenze.push({id:id,intestatario:intId,tipo:c.tipo||"elettrico",luogo:luogo,indirizzo:c.indirizzoFornitura||"",codice:c.codice,pde:c.pde||"",potenza:(c.potenza!=null?c.potenza:null),note:""});
+  cr.utenze++; return id;
+}
+function _esisteBollettaStato(rec, st){
+  for(var i=0;i<st.bollette.length;i++){ var b=st.bollette[i];
+    if(rec.numero && b.numero){ if(String(b.numero).trim()===String(rec.numero).trim()) return true; }
+    else if(rec.dataInizio && b.utenza===rec.utenza && b.dataInizio===rec.dataInizio) return true; }
+  return false;
+}
+function _importaFile(file, st, cr){
+  var url="https://drive.google.com/file/d/"+file.getId()+"/view";
+  var testo=_estraiTestoPdf(file.getBlob(), file.getName());
+  var blocchi=splitBollette(testo);
+  for(var i=0;i<blocchi.length;i++){
+    var c=parseBolletta(blocchi[i]);
+    var rec=_recDaParse(c, url, file.getName());
+    if(c.fornitore!=="energentium"){ rec.utenza=""; rec.note="fornitore non riconosciuto — compila a mano"; rec.id="b-"+new Date().getTime()+"-"+Math.floor(Math.random()*1e6); st.bollette.push(rec); cr.nonric++; continue; }
+    if(c.codice){ var intId=_trovaOCreaIntStato(c, st, cr); rec.utenza=_trovaOCreaUtStato(c, intId, st, cr); }
+    if(_esisteBollettaStato(rec, st)){ cr.dup++; continue; }
+    rec.id="b-"+new Date().getTime()+"-"+Math.floor(Math.random()*1e6);
+    st.bollette.push(rec); cr.bollette++;
+  }
+}
+function _importaRic(folder, st, cr){
+  var files=folder.getFilesByType("application/pdf");
+  while(files.hasNext()){ var f=files.next(); cr.file++; try{ _importaFile(f, st, cr); }catch(e){ cr.errori++; } }
+  var subs=folder.getFolders();
+  while(subs.hasNext()) _importaRic(subs.next(), st, cr);
+}
+// Importa ricorsivamente tutti i PDF di una cartella Drive. Sicuro da rilanciare (dedup per n° fattura).
+function importaCartella(folderId){
+  var st=_statoCorrente();
+  st.intestatari=st.intestatari||[]; st.utenze=st.utenze||[]; st.bollette=st.bollette||[]; st.azioni=st.azioni||[];
+  var cr={file:0,bollette:0,intestatari:0,utenze:0,dup:0,nonric:0,errori:0};
+  _importaRic(DriveApp.getFolderById(folderId), st, cr);
+  apiSalva(JSON.stringify(st));
+  return cr;
+}
+// Comando "uno e via": svuota le bollette e reimporta l'intero archivio storico.
+function reimportaArchivio(){
+  svuotaBollette();
+  var giugno = importaCartella("111rRESpsxfALneO7bvQ6I0CMzy1LmmBW"); // giugno 2026 bollete
+  var storico = importaCartella("1Hgs3jFSdv1VQE5UBuZKWP5mBaLnLbNSi"); // BOLLETTE (GAS+LUCE)
+  return { giugno: giugno, storico: storico };
+}
