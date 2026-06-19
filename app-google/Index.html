@@ -175,7 +175,7 @@
         var tipo=utenzaTipo(b.utenza); tot+=parseFloat(b.importo)||0;
         var scad=isScaduta(b); var stato=b.pagata?"Pagata":(scad?"Scaduta":"Da pagare");
         var col=b.pagata?"#1f5e3a":(scad?"#8a2a16":"#6e4a10"); var bg=b.pagata?"#DCEBE5":(scad?"#F2DCD4":"#F4E3C4");
-        html+='<tr><td><b>'+esc(utenzaLabel(b.utenza))+'</b>'+(b.numero?'<div class="soft">n. '+esc(b.numero)+'</div>':'')+'</td>'+
+        html+='<tr><td><b>'+esc(utenzaLabel(b.utenza))+'</b>'+(b.numero?'<div class="soft">n. '+esc(b.numero)+'</div>':'')+(b.note?'<div style="color:var(--rosso);font-size:12px">⚠ '+esc(b.note)+'</div>':'')+'</td>'+
           '<td class="mono">'+esc(dataIT(b.dataInizio))+' → '+esc(dataIT(b.dataFine))+'</td>'+
           '<td class="mono">'+((b.consumo!==""&&b.consumo!=null)?(numIT(b.consumo)+" "+unitaDi(tipo)):"—")+'</td>'+
           '<td class="mono"><b>'+eur(b.importo)+'</b>'+(b.quotaFissa?'<div class="soft">di cui fissa '+eur(b.quotaFissa)+'</div>':'')+'</td>'+
@@ -221,12 +221,75 @@
   }
   function annullaForm(){ FORM=null; render(); }
 
+  function normEnergia(s){return String(s||"").replace(/\s/g,"").toUpperCase().replace(/^IT0{0,2}1E/,"IT001E");}
+  // numero -> "" se il valore è nullo (i numeri 0 vanno tenuti)
+  function val(v){return (v===null||v===undefined)?"":v;}
+
   function campoToRec(c,res){
     c=c||{};
-    return {utenza:c.utenzaId||"", numero:c.numero||"",
-      dataInizio:c.dataInizio||"", dataFine:c.dataFine||"", consumo:c.consumo||"",
-      importo:c.importo||"", quotaFissa:c.quotaFissa||"", scadenza:c.scadenza||"",
-      pagata:false, linkDrive:res.url||"", fileNome:res.nome||""};
+    return {utenza:c.utenzaId||"", numero:c.numero||"", fornitore:c.fornitore||"",
+      dataInizio:c.dataInizio||"", dataFine:c.dataFine||"", consumo:val(c.consumo),
+      importo:val(c.importo), quotaFissa:val(c.quotaFissa), scadenza:c.scadenza||"",
+      prezzoUnitario:val(c.prezzoUnitario), consumoAnnuo:val(c.consumoAnnuo), spesaAnnua:val(c.spesaAnnua),
+      avvisoInsoluti:!!c.avvisoInsoluti, pagata:false, linkDrive:res.url||"", fileNome:res.nome||""};
+  }
+
+  // --- database incrementale: crea l'anagrafica dalla bolletta se manca ---
+  function trovaOCreaIntestatario(c){
+    var cod=c.codiceCliente||"";
+    var ex=STATO.intestatari.filter(function(x){return cod&&x.codiceCliente===cod;})[0];
+    if(ex) return ex.id;
+    if(c.intestatario){ var byNome=STATO.intestatari.filter(function(x){return (x.nome||"").toUpperCase()===c.intestatario.toUpperCase();})[0]; if(byNome) return byNome.id; }
+    var id="int-"+(cod||uid());
+    STATO.intestatari.push({id:id,nome:c.intestatario||("Cliente "+cod),cf:c.cf||"",codiceCliente:cod,fornitore:"Energentium"});
+    CREATI.intestatari++; return id;
+  }
+  function trovaOCreaUtenza(c,intId){
+    if(!c.codice) return ""; // senza POD/PDR non creo (resta "da abbinare")
+    var n=normEnergia(c.codice);
+    var ex=STATO.utenze.filter(function(x){return normEnergia(x.codice)===n;})[0];
+    if(ex){
+      if((ex.potenza==null||ex.potenza==="")&&c.potenza!=null) ex.potenza=c.potenza;
+      if(!ex.indirizzo&&c.indirizzoFornitura) ex.indirizzo=c.indirizzoFornitura;
+      if(!ex.pde&&c.pde) ex.pde=c.pde;
+      return ex.id;
+    }
+    var id="u-"+(c.pde||uid());
+    if(STATO.utenze.some(function(x){return x.id===id;})) id="u-"+uid();
+    var luogo=c.indirizzoFornitura?(c.indirizzoFornitura+(c.pde?" (PDE "+c.pde+")":"")):("PDE "+(c.pde||"?"));
+    STATO.utenze.push({id:id,intestatario:intId,tipo:c.tipo||"elettrico",luogo:luogo,
+      indirizzo:c.indirizzoFornitura||"",codice:c.codice,pde:c.pde||"",potenza:(c.potenza!=null?c.potenza:null),note:""});
+    CREATI.utenze++; return id;
+  }
+
+  // Assorbe il risultato del PDF: aggiunge le bollette e crea l'anagrafica mancante.
+  var CREATI;
+  function assorbiPdf(res){
+    var righe=(res&&res.righe)||[];
+    CREATI={intestatari:0,utenze:0};
+    var add=0,dup=0,nonric=0,incompleta=0;
+    if(!righe.length){
+      var rec0=campoToRec({},res); rec0.id=uid(); rec0.note="PDF caricato, dati da inserire a mano"; STATO.bollette.push(rec0); add++;
+    }
+    righe.forEach(function(c){
+      var rec=campoToRec(c,res);
+      if(c.fornitore!=="energentium"){
+        rec.id=uid(); rec.utenza=""; rec.note="fornitore non riconosciuto — compila a mano"; STATO.bollette.push(rec); nonric++; return;
+      }
+      if(c.codice){ var intId=trovaOCreaIntestatario(c); rec.utenza=trovaOCreaUtenza(c,intId); }
+      if(esisteBolletta(rec)){ dup++; return; }
+      if(rec.importo===""){ rec.note="dati incompleti — verifica"; incompleta++; }
+      rec.id=uid(); STATO.bollette.push(rec); add++;
+    });
+    salvaTutto(); FORM=null; render();
+    var msg="Lette dal PDF: "+add+" bollette aggiunte";
+    if(dup) msg+=" · "+dup+" doppioni saltati";
+    if(CREATI.utenze) msg+=" · "+CREATI.utenze+" nuove utenze";
+    if(CREATI.intestatari) msg+=" · "+CREATI.intestatari+" nuove parrocchie";
+    if(nonric) msg+=" · "+nonric+" da fornitore non riconosciuto";
+    if(incompleta) msg+=" · "+incompleta+" con dati incompleti";
+    statoSync("PDF assorbito ✓");
+    alert(msg+". Controlla nella tabella e correggi se serve.");
   }
   function esisteBolletta(rec){
     return STATO.bollette.some(function(b){
@@ -239,22 +302,12 @@
     statoSync("carico e leggo il PDF…");
     var r=new FileReader();
     r.onload=function(){
-      google.script.run.withSuccessHandler(function(res){
-        var righe=(res&&res.righe)||[];
-        if(righe.length>1){
-          var add=0,dup=0;
-          righe.forEach(function(c){var rec=campoToRec(c,res); if(esisteBolletta(rec)){dup++;return;} rec.id=uid(); STATO.bollette.push(rec); add++;});
-          salvaTutto(); FORM=null; render();
-          statoSync("aggiunte "+add+" bollette dal PDF");
-          alert("Il PDF conteneva "+righe.length+" bollette. Aggiunte: "+add+(dup?(" · doppioni saltati: "+dup):"")+". Controllale e correggi se serve.");
-          return;
-        }
-        FORM=campoToRec(righe[0]||{},res);
-        statoSync(righe.length?"PDF letto ✓ — controlla i dati":"PDF su Drive ✓ — compila a mano");
-        render();
-      }).withFailureHandler(function(e){ statoSync("errore PDF"); alert("Errore nel caricare il PDF: "+(e&&e.message?e.message:e)); }).apiCaricaPdf(r.result, f.name);
+      google.script.run.withSuccessHandler(assorbiPdf)
+        .withFailureHandler(function(e){ statoSync("errore PDF"); alert("Errore nel caricare il PDF: "+(e&&e.message?e.message:e)); })
+        .apiCaricaPdf(r.result, f.name);
     };
     r.readAsDataURL(f);
+    input.value="";
   }
 
   function salvaBolletta(){

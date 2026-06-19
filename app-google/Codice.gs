@@ -82,7 +82,7 @@ function apiCaricaPdf(base64, nome) {
     var st = _statoCorrente();
     var blocchi = splitBollette(testo);
     for (var i = 0; i < blocchi.length; i++) {
-      var c = parseEnergentium(blocchi[i]);
+      var c = parseBolletta(blocchi[i]);
       c.utenzaId = _matchUtenza(c.codice, st);
       out.righe.push(c);
     }
@@ -134,20 +134,41 @@ function splitBollette(testo){
   for (var i = 0; i < idx.length; i++) b.push(testo.slice(idx[i], i + 1 < idx.length ? idx[i + 1] : undefined));
   return b;
 }
+// Rimuove gli escape markdown ("\=" -> "=", "\+" -> "+", ...): a seconda di come
+// viene letto il PDF il testo puo' averli; cosi' le regex valgono in ogni caso.
+function _deEscape(t){ return String(t).replace(/\\([=+\-*_\[\]<>!#`])/g, "$1"); }
+
 function parseEnergentium(testo){
-  var t = String(testo).replace(/\s+/g, " ");
-  var o = {};
+  var t = _deEscape(String(testo)).replace(/\s+/g, " ");
+  var o = { fornitore: "energentium" };
+
+  // tipo (luce/gas)
+  o.tipo = /Codice PDR|GAS NATURALE/i.test(t) ? "gas" : "elettrico";
+
+  // anagrafica intestatario
+  var inte = t.match(/Intestatario:\s*([\s\S]+?)\s*Sede legale/i);
+  o.intestatario = inte ? inte[1].trim() : "";
+  var cc = t.match(/Codice cliente:\s*(\d+)/i);
+  o.codiceCliente = cc ? cc[1] : "";
+  var cf = t.match(/C\.F\.\/P\.IVA:\s*(\d{11,16})/i);
+  o.cf = cf ? cf[1] : "";
+
+  // codice fornitura (POD elettrico / PDR gas) e PDE
   var podLab = t.match(/Codice POD[:\s]+(IT\s?0{0,2}1E\s?\d{8,9})/i);
   var pdrLab = t.match(/Codice PDR[:\s]+(\d{14,15})/i);
   var pod = t.match(/IT\s?0{0,2}1E\s?\d{8,9}/i);
   o.codice = podLab ? podLab[1].replace(/\s/g, "") : pdrLab ? pdrLab[1] : pod ? pod[0].replace(/\s/g, "") : "";
+  var pde = t.match(/PDE:\s*(\d+)/i);
+  o.pde = pde ? pde[1] : "";
+
+  // periodo
   var per = t.match(/Periodo oggetto di fatturazione[:\s]+(\d{2}\/\d{2}\/\d{4})\s*-\s*(\d{2}\/\d{2}\/\d{4})/i);
   o.dataInizio = per ? toISO(per[1]) : "";
   o.dataFine = per ? toISO(per[2]) : "";
+
+  // riquadro di sintesi: importo Euro gg mese aaaa consumo (kWh|Smc)
   var MESI = "Gennaio|Febbraio|Marzo|Aprile|Maggio|Giugno|Luglio|Agosto|Settembre|Ottobre|Novembre|Dicembre";
   var mlist = ["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
-  // Riquadro di sintesi: nella conversione i valori compaiono come blocco a sé,
-  // es. "85,75 Euro 08 Luglio 2026 2 kWh" → importo · scadenza · consumo.
   var imp = "", cons = "", scad = "";
   var box = t.match(new RegExp("([\\d.]+,\\d{2})\\s+Euro\\s+(\\d{1,2})\\s+(" + MESI + ")\\s+(20\\d{2})\\s+([\\d.]+)\\s+(?:kWh|Smc)", "i"));
   if (box) {
@@ -157,18 +178,51 @@ function parseEnergentium(testo){
   }
   var tot = t.match(/TOTALE DA PAGARE\s*=?\s*([\d.]+,\d{2})/i);
   if (tot) imp = tot[1];
-  if (!cons){ var c = t.match(/([\d.]+)\s*kWh\s*x/i) || t.match(/([\d.]+)\s*Smc\s*x/i); if (c) cons = c[1]; }
-  o.importo = imp ? String(parseNumIt(imp)) : "";
-  o.consumo = cons ? String(parseNumIt(cons)) : "";
+  if (cons === ""){ var c = t.match(/([\d.]+)\s*kWh\s*x/i) || t.match(/([\d.]+)\s*Smc\s*x/i); if (c) cons = c[1]; }
+  o.importo = imp ? parseNumIt(imp) : null;
+  o.consumo = cons !== "" ? parseNumIt(cons) : null;
   o.scadenza = scad;
+
   var nf = t.match(/nr\.\s*([\d\-]+)\s+del/i); o.numero = nf ? nf[1] : "";
+
+  // quota fissa (+ quota potenza per la luce)
   var qf = 0, found = false;
   var qfm = t.match(/Quota fissa(?:\s+e\s+Quota potenza)?\s+\d+\s*mes[ei]?\s*x?\s*[\d.,]+\s*€?\/?mese\s*\+?\s*([\d.]+,\d{2})/i);
   if (qfm){ qf += parseNumIt(qfm[1]) || 0; found = true; }
   var potm = t.match(/[\d.]+,\d{2}\s*kW\s+per\s+\d+\s*mes[ei]?\s*x?\s*[\d.,]+\s*€\/kW\/mese\s*\+?\s*([\d.]+,\d{2})/i);
   if (potm){ qf += parseNumIt(potm[1]) || 0; found = true; }
-  o.quotaFissa = found ? String(qf) : "";
+  o.quotaFissa = found ? qf : null;
+
+  // campi aggiuntivi per le analisi
+  var pu = t.match(/Quota per consumi\s+[\d.]+\s*(?:kWh|Smc)\s*x\s*([\d.,]+)\s*€\/(?:kWh|Smc)/i);
+  o.prezzoUnitario = pu ? parseNumIt(pu[1]) : null;
+  var ca = t.match(/Consumo annuo aggiornato:?\s*([\d.]+)\s*(?:kWh|Smc)/i);
+  o.consumoAnnuo = ca ? parseNumIt(ca[1]) : null;
+  var sa = t.match(/Spesa annua sostenuta:?\s*([\d.]+,\d{2})\s*€/i);
+  o.spesaAnnua = sa ? parseNumIt(sa[1]) : null;
+  var po = t.match(/Potenza Impegnata:?\s*([\d.]+,\d{2})\s*kW/i);
+  o.potenza = po ? parseNumIt(po[1]) : null;
+  var off = t.match(/Offerta:\s*(.+?)\s*Data di scadenza/i);
+  o.offerta = off ? off[1].trim() : "";
+  var ind = t.match(/Indirizzo di fornitura:\s*(.+?)\s*-\s*\d{5}\s/i);
+  o.indirizzoFornitura = ind ? ind[1].trim() : "";
+  o.avvisoInsoluti = /risultano non pagate/i.test(t);
+
   return o;
+}
+
+// Riconosce il fornitore. Oggi: Energentium. Gli altri -> "sconosciuto"
+// (vengono segnalati, non parsati a caso).
+function rilevaFornitore(testo){
+  if (/energentium/i.test(String(testo))) return "energentium";
+  return "sconosciuto";
+}
+var PARSERS = { energentium: parseEnergentium };
+// Punto d'ingresso: per ogni blocco rileva il fornitore e applica il parser giusto.
+function parseBolletta(blocco){
+  var fornitore = rilevaFornitore(blocco);
+  if (PARSERS[fornitore]) { var o = PARSERS[fornitore](blocco); o.fornitore = fornitore; return o; }
+  return { fornitore: "sconosciuto", riconosciuta: false };
 }
 function _statoCorrente(){ var r = apiCarica(); try { return r ? JSON.parse(r) : {}; } catch (e) { return {}; } }
 function _matchUtenza(codice, st){
