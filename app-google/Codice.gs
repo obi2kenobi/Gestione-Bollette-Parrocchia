@@ -223,16 +223,3 @@ function svuotaBollette(){
   apiSalva(JSON.stringify(st));
   return "bollette svuotate";
 }
-
-/* COMPATIBILITÀ vecchia app locale (fetch + parola) */
-var PAROLA_SEGRETA = "cambiami-con-una-parola-segreta";
-function doPost(e) {
-  try {
-    var corpo = {};
-    if (e && e.postData && e.postData.contents) corpo = JSON.parse(e.postData.contents);
-    if (String(corpo.parola || "") !== PAROLA_SEGRETA) return _json({ ok: false, errore: "parola-errata" });
-    if ((corpo.azione || "carica") === "salva") { apiSalva(corpo.contenuto || ""); return _json({ ok: true }); }
-    return _json({ ok: true, contenuto: apiCarica() });
-  } catch (err) { return _json({ ok: false, errore: String(err) }); }
-}
-function _json(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
