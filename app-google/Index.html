@@ -74,7 +74,7 @@
     <main id="main"></main>
   </div>
 <script>
-  var STATO=null, TAB="utenze", FORM=null;
+  var STATO=null, TAB="utenze", FORM=null, VERSIONE=0;
   var TABS=[{id:"utenze",label:"Utenze"},{id:"bollette",label:"Bollette"},{id:"consumi",label:"Analisi consumi"},{id:"azioni",label:"Azioni aperte"}];
   function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
   function uid(){return 'b-'+Date.now()+'-'+Math.floor(Math.random()*100000);}
@@ -91,8 +91,9 @@
   function isScaduta(b){return !b.pagata && b.scadenza && b.scadenza < oggiISO();}
   function togglePagata(id){var b=STATO.bollette.filter(function(x){return x.id===id;})[0]; if(b){b.pagata=!b.pagata; salvaTutto(); render();}}
 
-  function avvia(){ google.script.run.withSuccessHandler(onCaricato).withFailureHandler(onErrore).apiCarica(); }
-  function onCaricato(json){
+  function avvia(){ google.script.run.withSuccessHandler(onCaricato).withFailureHandler(onErrore).apiStato(); }
+  function onCaricato(resp){
+    var json=resp&&resp.dati; VERSIONE=(resp&&resp.versione)||0;
     try{STATO=json?JSON.parse(json):null;}catch(e){STATO=null;}
     if(!STATO){STATO={intestatari:[],utenze:[],bollette:[],azioni:[]};}
     STATO.intestatari=STATO.intestatari||[]; STATO.utenze=STATO.utenze||[];
@@ -105,10 +106,22 @@
     document.getElementById("boot").innerHTML='<div><div style="font-family:var(--serif);font-size:20px;color:var(--rosso)">Errore di lettura</div><div class="soft" style="margin-top:8px">'+esc(err&&err.message?err.message:err)+'</div></div>';
   }
 
-  // salva tutto l'archivio nel Foglio
+  // salva tutto l'archivio nel Foglio (con controllo di versione: se un altro
+  // accesso ha modificato i dati nel frattempo, ricarico invece di sovrascrivere)
   function salvaTutto(){
     statoSync("salvataggio…");
-    google.script.run.withSuccessHandler(function(){statoSync("salvato ✓");}).withFailureHandler(function(e){statoSync("errore salvataggio");}).apiSalva(JSON.stringify(STATO));
+    google.script.run.withSuccessHandler(function(res){
+      if(res && res.conflitto){
+        try{STATO=res.dati?JSON.parse(res.dati):STATO;}catch(e){}
+        VERSIONE=res.versione;
+        STATO.intestatari=STATO.intestatari||[]; STATO.utenze=STATO.utenze||[];
+        STATO.bollette=STATO.bollette||[]; STATO.azioni=STATO.azioni||[];
+        FORM=null; render(); statoSync("ricaricato");
+        alert("I dati erano stati modificati da un altro accesso. Ho ricaricato la versione aggiornata: ricontrolla e rifai la tua modifica.");
+        return;
+      }
+      VERSIONE=(res&&res.versione)||VERSIONE; statoSync("salvato ✓");
+    }).withFailureHandler(function(e){statoSync("errore salvataggio");}).apiSalva(JSON.stringify(STATO), VERSIONE);
   }
 
   function renderNav(){
@@ -203,7 +216,7 @@
 
   function apriForm(id){
     if(id){ FORM=JSON.parse(JSON.stringify(STATO.bollette.filter(function(b){return b.id===id;})[0]||{})); }
-    else { FORM={utenza:(STATO.utenze[0]||{}).id||"", pagata:false}; }
+    else { FORM={utenza:"", pagata:false}; }
     render();
   }
   function annullaForm(){ FORM=null; render(); }

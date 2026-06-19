@@ -25,11 +25,34 @@ function apiCarica() {
   var v = _schedaDati().getRange('A1').getValue();
   return v ? String(v) : '';
 }
-function apiSalva(json) {
-  var sh = _schedaDati();
-  sh.getRange('A1').setValue(json);
-  sh.getRange('B1').setValue(new Date());
-  return true;
+function _versione() {
+  var p = PropertiesService.getScriptProperties().getProperty('versione');
+  return p ? Number(p) : 0;
+}
+// Stato per la UI: dati + numero di versione (per la concorrenza ottimistica).
+function apiStato() {
+  return { dati: apiCarica(), versione: _versione() };
+}
+// Salva l'archivio. Con un lock (niente scritture sovrapposte) e controllo di
+// versione: se i dati sono cambiati da quando il client li ha letti, NON
+// sovrascrive e restituisce la versione aggiornata (così il client ricarica).
+function apiSalva(json, versioneAttesa) {
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    var vCorr = _versione();
+    if (versioneAttesa != null && Number(versioneAttesa) !== vCorr) {
+      return { ok: false, conflitto: true, dati: apiCarica(), versione: vCorr };
+    }
+    var sh = _schedaDati();
+    sh.getRange('A1').setValue(json);
+    sh.getRange('B1').setValue(new Date());
+    var vNuova = vCorr + 1;
+    PropertiesService.getScriptProperties().setProperty('versione', String(vNuova));
+    return { ok: true, versione: vNuova };
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 var CARTELLA_PDF = "Bollette PDF — Gestione Utenze";
@@ -81,7 +104,9 @@ function _estraiTestoPdf(blob, nome) {
   try {
     testo = DocumentApp.openById(id).getBody().getText();
   } finally {
-    try { DriveApp.getFileById(id).setTrashed(true); } catch (e) {}
+    // Elimina definitivamente il Doc temporaneo creato dall'app (niente accumulo nel cestino).
+    try { Drive.Files.remove(id); }
+    catch (e) { try { DriveApp.getFileById(id).setTrashed(true); } catch (e2) {} }
   }
   return testo;
 }
