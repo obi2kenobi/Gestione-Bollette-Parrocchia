@@ -1,15 +1,15 @@
 file	classe	affermazione	atteso	trovato	esito
-README.md	DA CORREGGERE	App nativa Google Apps Script (link, niente download)	app-google/ ha un deploy webapp ed è un'app web	app-google/Codice.gs doGet() (riga ~21) + appsscript.json webapp access ANYONE_ANONYMOUS	OK
+README.md	AGGIORNATO	App nativa Google Apps Script (link, niente download)	app-google/ ha un deploy webapp ed è un'app web	app-google/Codice.gs doGet() (riga ~21) + appsscript.json webapp access ANYONE_ANONYMOUS	CORRETTO
 README.md	AGGIORNATO	Code.gs — backend	file app-google/Codice.gs esiste ma il nome è Codice.gs (non Code.gs)	app-google/Codice.gs — README ora dice Codice.gs (era Code.gs)	CORRETTO
-README.md	DA CORREGGERE	Dati sul Foglio DATI!A1, blob JSON	apiCarica legge getRange('A1') della scheda DATI; apiSalva salva il blob su A1	app-google/Codice.gs righe 17-32, 40+	OK
-README.md	DA CORREGGERE	Parser Energentium: importo, consumo, scadenza, n° fattura, quota fissa	funzione parseEnergentium con importo/consumo/scadenza/numero/quotaFissa	app-google/Codice.gs righe 114-200 (o.importo/consumo/numero/quotaFissa)	OK
-README.md	DA CORREGGERE	Dati nel Foglio "Archivio Utenze"	nome del foglio non presente nel repo (solo scheda 'DATI' by ID)	solo ID SHEET_ID e scheda DATI (Codice.gs righe 17-24)	NON-VERIFICABILE
-README.md	DA CORREGGERE	PDF nella cartella Drive "Bollette PDF — Gestione Utenze"	costante CARTELLA_PDF con quel nome	app-google/Codice.gs riga 58: "Bollette PDF — Gestione Utenze"	OK
-README.md	DA CORREGGERE	index.html — vecchia app mono-file (React via CDN, girava in locale). Superata	index.html esiste, usa React CDN	index.html righe 25-27 (React, ReactDOM, lucide-react da unpkg); README dichiara "Superata"	OK
-README.md	DA CORREGGERE	apps-script/ — prima integrazione cloud (web-app + parola segreta). Superata	apps-script ha Codice.gs + ISTRUZIONI.md (web-app + PAROLA_SEGRETA)	apps-script/Codice.gs + ISTRUZIONI.md righe 1-15 (PAROLA_SEGRETA)	OK
-README.md	DA CORREGGERE	backup-estratto-parziale.json — estrazione bollette di prova	file con estrazione bollette (intestatari/bollette)	backup-estratto-parziale.json 455 righe; app "gestione-utenze", fornitore Energentium	OK
-README.md	DA CORREGGERE	In prospettiva: deploy diretto con clasp (clasp push)	config clasp nel repo	app-google/.clasp.json presente (scriptId, rootDir, extensions)	OK
-README.md	DA CORREGGERE	Pubblicazione: Vedi app-google/ISTRUZIONI.md	file esiste come riferimento	app-google/ISTRUZIONI.md esiste (4 tappe; "App nativa Google Apps Script")	OK
+README.md	AGGIORNATO	Dati sul Foglio DATI!A1, blob JSON	apiCarica legge getRange('A1') della scheda DATI; apiSalva salva il blob su A1	app-google/Codice.gs righe 17-32, 40+	CORRETTO
+README.md	AGGIORNATO	Parser Energentium: importo, consumo, scadenza, n° fattura, quota fissa	funzione parseEnergentium con importo/consumo/scadenza/numero/quotaFissa	app-google/Codice.gs righe 114-200 (o.importo/consumo/numero/quotaFissa)	CORRETTO
+README.md	AGGIORNATO-PARZIALE	Dati nel Foglio "Archivio Utenze"	nome del foglio non presente nel repo (solo scheda 'DATI' by ID)	solo ID SHEET_ID e scheda DATI (Codice.gs righe 17-24)	NON-VERIFICABILE
+README.md	AGGIORNATO	PDF nella cartella Drive "Bollette PDF — Gestione Utenze"	costante CARTELLA_PDF con quel nome	app-google/Codice.gs riga 58: "Bollette PDF — Gestione Utenze"	CORRETTO
+README.md	AGGIORNATO	index.html — vecchia app mono-file (React via CDN, girava in locale). Superata	index.html esiste, usa React CDN	index.html righe 25-27 (React, ReactDOM, lucide-react da unpkg); README dichiara "Superata"	CORRETTO
+README.md	AGGIORNATO	apps-script/ — prima integrazione cloud (web-app + parola segreta). Superata	apps-script ha Codice.gs + ISTRUZIONI.md (web-app + PAROLA_SEGRETA)	apps-script/Codice.gs + ISTRUZIONI.md righe 1-15 (PAROLA_SEGRETA)	CORRETTO
+README.md	AGGIORNATO	backup-estratto-parziale.json — estrazione bollette di prova	file con estrazione bollette (intestatari/bollette)	backup-estratto-parziale.json 455 righe; app "gestione-utenze", fornitore Energentium	CORRETTO
+README.md	AGGIORNATO	In prospettiva: deploy diretto con clasp (clasp push)	config clasp nel repo	app-google/.clasp.json presente (scriptId, rootDir, extensions)	CORRETTO
+README.md	AGGIORNATO	Pubblicazione: Vedi app-google/ISTRUZIONI.md	file esiste come riferimento	app-google/ISTRUZIONI.md esiste (4 tappe; "App nativa Google Apps Script")	CORRETTO
 GUIDA.md	AGGIORNATO-PARZIALE	Il programma è un unico file index.html	file unico presente alla radice	index.html (4736 righe)	OK
 GUIDA.md	AGGIORNATO-PARZIALE	Al primo avvio serve Internet per scaricare librerie (una volta sola)	index.html carica React/lucide da CDN e pdf.js da CDN lazy	index.html righe 25-27 (unpkg), 597-610 (cdnjs pdf.js 3.11.174)	NON-VERIFICABILE
 GUIDA.md	AGGIORNATO-PARZIALE	I dati restano dentro il browser di questo computer — non su Internet	lettura/scrittura dati via localStorage (window.storage solo in Claude)	index.html righe 474-511 (localStorage KEY/CFG_KEY)	OK
