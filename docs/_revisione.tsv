@@ -1,6 +1,6 @@
 file	classe	affermazione	atteso	trovato	esito
 README.md	DA CORREGGERE	App nativa Google Apps Script (link, niente download)	app-google/ ha un deploy webapp ed è un'app web	app-google/Codice.gs doGet() (riga ~21) + appsscript.json webapp access ANYONE_ANONYMOUS	OK
-README.md	DA CORREGGERE	Code.gs — backend	file app-google/Codice.gs esiste ma il nome è Codice.gs (non Code.gs)	app-google/Codice.gs: 1 file; Code.gs assente	DIVERSO
+README.md	AGGIORNATO	Code.gs — backend	file app-google/Codice.gs esiste ma il nome è Codice.gs (non Code.gs)	app-google/Codice.gs — README ora dice Codice.gs (era Code.gs)	CORRETTO
 README.md	DA CORREGGERE	Dati sul Foglio DATI!A1, blob JSON	apiCarica legge getRange('A1') della scheda DATI; apiSalva salva il blob su A1	app-google/Codice.gs righe 17-32, 40+	OK
 README.md	DA CORREGGERE	Parser Energentium: importo, consumo, scadenza, n° fattura, quota fissa	funzione parseEnergentium con importo/consumo/scadenza/numero/quotaFissa	app-google/Codice.gs righe 114-200 (o.importo/consumo/numero/quotaFissa)	OK
 README.md	DA CORREGGERE	Dati nel Foglio "Archivio Utenze"	nome del foglio non presente nel repo (solo scheda 'DATI' by ID)	solo ID SHEET_ID e scheda DATI (Codice.gs righe 17-24)	NON-VERIFICABILE
@@ -21,11 +21,11 @@ GUIDA.md	AGGIORNATO-PARZIALE	Lettura dei PDF richiede la connessione a Internet 
 GUIDA.md	AGGIORNATO-PARZIALE	CSV export (Excel / Google Fogli)	comando CSV con .csv con BOM	index.html righe 1243-1265 (registro-utenze-YYYY-MM-DD.csv)	OK
 GUIDA.md	AGGIORNATO-PARZIALE	Scadenze (.ics) export per calendario	comando ICS con BEGIN:VCALENDAR	index.html righe 1296-1318 (exportICS)	OK
 GUIDA.md	AGGIORNATO-PARZIALE	Collegamento automatico al PDF per nome file (ricerca per nome su Drive)	linkDriveAutomatico crea ricerca per nome	index.html riga 564: search?q="<fileNome>"	OK
-CLAUDE.md	DA CORREGGERE	Costruire il motore nuovo (app/engine)	cartella app/engine presente nel repo	app/ assente; tools/ contiene solo gas-gate.sh	DIVERSO
-CLAUDE.md	DA CORREGGERE	SAL.md — diario vivo (stato + §8 log cronologico)	file SAL.md presente	SAL.md assente	DIVERSO
-CLAUDE.md	DA CORREGGERE	docs/47 e docs/48 — oro del motore	pat nella repo	docs/47, docs/48 assenti (docs/ contiene solo _guida-lista.txt e _inventario.tsv)	DIVERSO
-CLAUDE.md	DA CORREGGERE	Test motore: pnpm --filter @myhouse/engine test	ipackage.json / app/engine presente con test pnpm	nessun pnpm/package.json; app/assente	DIVERSO
-CLAUDE.md	DA CORREGGERE	Banco legacy headless: php tools/motore-test/harness.php tools/motore-test/fixtures/<id>.php → last_dump.txt	tools/motore-test/harness.php esistente	tools/motore-test assente (solo tools/gas-gate.sh)	DIVERSO
+CLAUDE.md	AGGIORNATO	Costruire il motore nuovo (app/engine)	cartella app/engine presente nel repo	CLAUDE.md — ora dichiara gli artefatti non presenti (app/engine, SAL.md, docs/47, docs/48, motore-test, test pnpm)	CORRETTO
+CLAUDE.md	AGGIORNATO	SAL.md — diario vivo (stato + §8 log cronologico)	file SAL.md presente	CLAUDE.md — ora dichiara gli artefatti non presenti (app/engine, SAL.md, docs/47, docs/48, motore-test, test pnpm)	CORRETTO
+CLAUDE.md	AGGIORNATO	docs/47 e docs/48 — oro del motore	pat nella repo	CLAUDE.md — ora dichiara gli artefatti non presenti (app/engine, SAL.md, docs/47, docs/48, motore-test, test pnpm)	CORRETTO
+CLAUDE.md	AGGIORNATO	Test motore: pnpm --filter @myhouse/engine test	ipackage.json / app/engine presente con test pnpm	CLAUDE.md — ora dichiara gli artefatti non presenti (app/engine, SAL.md, docs/47, docs/48, motore-test, test pnpm)	CORRETTO
+CLAUDE.md	AGGIORNATO	Banco legacy headless: php tools/motore-test/harness.php tools/motore-test/fixtures/<id>.php → last_dump.txt	tools/motore-test/harness.php esistente	CLAUDE.md — ora dichiara gli artefatti non presenti (app/engine, SAL.md, docs/47, docs/48, motore-test, test pnpm)	CORRETTO
 apps-script/	NON-REVISIONATO	Cartella apps-script/ (prima integrazione cloud) — 2 file, guida ISTRUZIONI.md non selezionata	solo NON-REVISIONATO, 1 riga per cartella	apps-script/Codice.gs (76 righe), apps-script/ISTRUZIONI.md (61 righe)	NON-VERIFICABILE
 app-google/	NON-REVISIONATO	Cartella app-google/ — 4 file, guida ISTRUZIONI.md non selezionata	solo NON-REVISIONATO, 1 riga per cartella	app-google/Codice.gs, Index.html, ISTRUZIONI.md, appsscript.json	NON-VERIFICABILE
 docs/	NON-REVISIONATO	Cartella docs/ — 2 file di lavoro (_guida-lista.txt, _inventario.tsv)	solo NON-REVISIONATO	docs/_guida-lista.txt, docs/_inventario.tsv	NON-VERIFICABILE

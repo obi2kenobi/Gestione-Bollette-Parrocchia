@@ -6,7 +6,7 @@ Gruppo Camarlinghi. Fornitore principale: **Energentium**.
 ## App in uso — `app-google/`
 App nativa **Google Apps Script** (un link, niente download, multiutente):
 
-- **`Code.gs`** — backend: serve l'interfaccia, legge/salva i dati sul Foglio
+- **`Codice.gs`** — backend: serve l'interfaccia, legge/salva i dati sul Foglio
   (`DATI!A1`, blob JSON), salva i PDF su Drive e li **legge automaticamente**
   (parser Energentium: importo, consumo, scadenza, n° fattura, quota fissa).
 - **`Index.html`** — interfaccia (HTML/JS puro, niente librerie esterne).

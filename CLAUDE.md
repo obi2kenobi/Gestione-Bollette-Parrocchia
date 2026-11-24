@@ -101,7 +101,9 @@ When debugging, change one thing at a time and verify the result before making t
 
 ### Circuito di validazione → scoperte sempre persistite (deciso con Luca 2026-05-31)
 Costruire il **motore nuovo** (`app/engine`) significa riprodurre il **motore legacy reale** al millimetro
-(banco `tools/motore-test/`). In questo processo emergono scoperte e si trovano errori — di **due tipi distinti**:
+(banco `tools/motore-test/`).
+
+NOTA (correzione R3, 2026-11-24): `app/engine`, `SAL.md`, `docs/47`, `docs/48`, `tools/motore-test/` e il test pnpm non sono presenti in questo repo; sono progettati, non ancora esistenti. In questo processo emergono scoperte e si trovano errori — di **due tipi distinti**:
 - **bug del vecchio** (es. MC-*) → si correggono nel vecchio e diventano *requisito* del nuovo (`docs/47`, `docs/48`);
 - **errori nei nostri appunti/oracoli** (dati trascritti male) → si correggono e si annotano **come tali**, non come MC-*.
 
@@ -112,5 +114,5 @@ step successivo**, non solo nel messaggio di commit:
 - **`docs/47`** — correzioni applicate (separando bug del vecchio da errori-dato nostri).
 
 ### Stack / comandi (app/engine)
-- Test motore: `pnpm --filter @myhouse/engine test` · Lint/format: `pnpm exec biome check engine/src` (da `app/`).
-- Banco legacy headless: `php tools/motore-test/harness.php tools/motore-test/fixtures/<id>.php` → `last_dump.txt`.
+- Test motore: `pnpm --filter @myhouse/engine test` · Lint/format: `pnpm exec biome check engine/src` (da `app/`) — NON esistenti in questo repo (planned).
+- Banco legacy headless: `php tools/motore-test/harness.php tools/motore-test/fixtures/<id>.php` → `last_dump.txt` — NON esistente in questo repo (planned).
