@@ -29,3 +29,8 @@ CLAUDE.md	AGGIORNATO	Banco legacy headless: php tools/motore-test/harness.php to
 apps-script/	NON-REVISIONATO	Cartella apps-script/ (prima integrazione cloud) — 2 file, guida ISTRUZIONI.md non selezionata	solo NON-REVISIONATO, 1 riga per cartella	apps-script/Codice.gs (76 righe), apps-script/ISTRUZIONI.md (61 righe)	NON-VERIFICABILE
 app-google/	NON-REVISIONATO	Cartella app-google/ — 4 file, guida ISTRUZIONI.md non selezionata	solo NON-REVISIONATO, 1 riga per cartella	app-google/Codice.gs, Index.html, ISTRUZIONI.md, appsscript.json	NON-VERIFICABILE
 docs/	NON-REVISIONATO	Cartella docs/ — 2 file di lavoro (_guida-lista.txt, _inventario.tsv)	solo NON-REVISIONATO	docs/_guida-lista.txt, docs/_inventario.tsv	NON-VERIFICABILE
+docs/LLM-GUIDA.md	AGGIORNATO	app-google/ app in uso con Codice.gs, Index.html, ISTRUZIONI.md, appsscript.json	4 file in app-google/	4 file (Codice.gs, Index.html, ISTRUZIONI.md, appsscript.json)	CORRETTO
+docs/LLM-GUIDA.md	AGGIORNATO	tools/gas-gate.sh — script di gate (56 righe)	file esiste, 56 righe	tools/gas-gate.sh, 56 righe	CORRETTO
+docs/LLM-GUIDA.md	AGGIORNATO	docs/archivio/ non esiste in questo ramo	docs/archivio mancante	nessun docs/archivio (solo LLM-GUIDA.md, _guida-lista.txt, _inventario.tsv, _revisione.tsv)	CORRETTO
+docs/LLM-GUIDA.md	AGGIORNATO-PARZIALE	foglio "Archivio Utenze" nome non verificabile dal repo; scheda DATI	Solo DATI in Codice.gs	SHEET_ID + getSheetByName('DATI') (Codice.gs righe 17-21); nome "Archivio Utenze" non nel repo	NON-VERIFICABILE
+docs/LLM-GUIDA.md	NON-REVISIONATO	Comandi gas-gate.sh e clasp push "non verificato"	gas-gate.sh non eseguito in questo ciclo	GAS-gate non eseguito; clasp push mai eseguito (non via rete)	NON-VERIFICABILE

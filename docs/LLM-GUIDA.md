@@ -8,8 +8,8 @@ Guida per un LLM che deve lavorare su questo repo. Ultimo aggiornamento: 2026-11
 - `index.html` — vecchia app mono-file (React via CDN, girava in locale). **Superata**.
 - `apps-script/` — prima integrazione cloud (web-app + parola segreta). **Superata**.
 - `backup-estratto-parziale.json` — estrazione bollette di prova.
-- `docs/` — inventario e revisione documenti (`_guida-lista.txt`, `_inventario.tsv`, `_revisione.tsv`).
-- `GUIDA.md`, `README.md`, `CLAUDE.md` — guide/standard; le sezioni non verificate sono marcate in `docs/_revisione.tsv`.
+- `docs/` — inventario e revisione documenti (`_guida-lista.txt`, `_inventario.tsv`, `_revisione.tsv`), `LLM-GUIDA.md`, `REGOLE-CLAUDE-originale.md` (regola pre-R4 archiviata).
+- `GUIDA.md`, `README.md`, `CLAUDE.md` (G7: standard ridotto, regola originale in docs/REGOLE-CLAUDE-originale.md) — guide/standard; le sezioni non verificate sono marcate in `docs/_revisione.tsv`.
 
 ## Cosa NON fare
 - Non modificare `index.html` o `apps-script/`: storici, superati.

@@ -1,3 +1,4 @@
-CLAUDE.md
 README.md
+CLAUDE.md
+docs/LLM-GUIDA.md
 GUIDA.md
