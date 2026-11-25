@@ -12,8 +12,9 @@
  * tienila privata. La stessa parola va incollata dentro l'app.
  */
 
-// 🔑 CAMBIA QUESTA PAROLA con una tua, segreta (lettere e numeri, niente spazi):
-const PAROLA_SEGRETA = "cambiami-con-una-parola-segreta";
+// 🔑 La parola segreta NON va nel codice: va letta dalle Script Properties del progetto
+// ("PAROLA_SEGRETA"). Se non impostata, l'accesso è negato (fail-closed).
+const PAROLA_SEGRETA = PropertiesService.getScriptProperties().getProperty("PAROLA_SEGRETA") || "";
 
 // Nome della scheda e cella dove vive l'archivio (non serve toccarli).
 const SCHEDA_DATI = "DATI";
@@ -41,7 +42,7 @@ function doPost(e) {
     }
 
     // Controllo della parola segreta
-    if (String(corpo.parola || "") !== PAROLA_SEGRETA) {
+    if (!PAROLA_SEGRETA || String(corpo.parola || "") !== PAROLA_SEGRETA) {
       return rispondi({ ok: false, errore: "parola-errata" });
     }
 
