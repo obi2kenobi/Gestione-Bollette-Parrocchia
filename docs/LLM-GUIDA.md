@@ -31,3 +31,6 @@ Guida per un LLM che deve lavorare su questo repo. Ultimo aggiornamento: 2026-11
 ## Verifica
 Comando di verifica R4 (da Capo):
 `python3 -I ~/openclaw-lab/mandati/verifiche/m006-verifica.py r4 <worktree> 4b55167b577f8422c6ecc8270f2e8d53639f4abe op/M-006-4 Gestione-Bollette-Parrocchia`
+
+## Istruzioni d'uso
+- vedi `docs/ISTRUZIONI.md` — istruzioni per ogni software del repo.

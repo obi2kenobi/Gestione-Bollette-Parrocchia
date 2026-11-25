@@ -19,6 +19,9 @@ Dati nel Foglio "Archivio Utenze" · PDF nella cartella Drive "Bollette PDF — 
 - `apps-script/` — prima integrazione cloud (web-app + parola segreta). Superata.
 - `backup-estratto-parziale.json` — estrazione bollette di prova.
 
+## Istruzioni generali
+Per le istruzioni d'uso di ogni software vedi `docs/ISTRUZIONI.md`.
+
 ## Pubblicazione
 Vedi `app-google/ISTRUZIONI.md`. In prospettiva: deploy diretto con **clasp**
 (`clasp push`) per non copiare/incollare più nulla.
