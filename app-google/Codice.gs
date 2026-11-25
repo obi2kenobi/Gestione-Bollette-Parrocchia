@@ -336,8 +336,10 @@ function _importaFile(file, st, cr){
     var c=parseBolletta(blocchi[i]);
     var rec=_recDaParse(c, url, file.getName());
     if(c.fornitore!=="energentium"){ rec.utenza=""; rec.note="fornitore non riconosciuto — compila a mano"; rec.id="b-"+new Date().getTime()+"-"+Math.floor(Math.random()*1e6); st.bollette.push(rec); cr.nonric++; continue; }
+    if(rec.numero){ var dupNum=false; for(var qi=0;qi<st.bollette.length;qi++){ if(st.bollette[qi].numero && String(st.bollette[qi].numero).trim()===String(rec.numero).trim()){ dupNum=true; break; } } if(dupNum){ cr.dup++; continue; } }
+    var intestAttivo=st.intestatari.length, utenzeAttive=st.utenze.length;
     rec.utenza=_agganciaUtenza(c, st, cr);
-    if(_esisteBollettaStato(rec, st)){ cr.dup++; continue; }
+    if(_esisteBollettaStato(rec, st)){ st.intestatari.length=intestAttivo; st.utenze.length=utenzeAttive; cr.dup++; continue; }
     rec.id="b-"+new Date().getTime()+"-"+Math.floor(Math.random()*1e6);
     st.bollette.push(rec); cr.bollette++;
   }
