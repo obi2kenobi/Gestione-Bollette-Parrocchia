@@ -554,7 +554,7 @@ const num = n => n == null || isNaN(n) ? "—" : n.toLocaleString("it-IT", {
   maximumFractionDigits: 1
 });
 const uid = () => typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2, 9);
-const oggiISO = () => new Date().toISOString().slice(0, 10);
+const oggiISO = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
 // Una bolletta è "scaduta" se non è pagata e la data di scadenza è passata.
 const isScaduta = b => !b.pagata && !!b.scadenza && b.scadenza < oggiISO();
 
