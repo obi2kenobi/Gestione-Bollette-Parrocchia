@@ -25,3 +25,6 @@ Per le istruzioni d'uso di ogni software vedi `docs/ISTRUZIONI.md`.
 ## Pubblicazione
 Vedi `app-google/ISTRUZIONI.md`. In prospettiva: deploy diretto con **clasp**
 (`clasp push`) per non copiare/incollare più nulla.
+
+## Scheda tecnica
+- vedi `docs/SCHEDA-TECNICA.md` — scheda tecnica sintetica del repo.

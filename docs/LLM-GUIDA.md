@@ -34,3 +34,6 @@ Comando di verifica R4 (da Capo):
 
 ## Istruzioni d'uso
 - vedi `docs/ISTRUZIONI.md` — istruzioni per ogni software del repo.
+
+## Scheda tecnica
+- vedi `docs/SCHEDA-TECNICA.md` — scheda tecnica sintetica del repo (2026-11-26).
